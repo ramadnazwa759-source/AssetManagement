@@ -6,3 +6,5 @@ abstract class Controller
 {
     //
 }
+
+# asalamualaikum wrwb kawan kawan kuu ya habibi

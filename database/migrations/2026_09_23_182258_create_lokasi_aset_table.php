@@ -6,22 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('pengembalian_aset', function (Blueprint $table) {
-            $table->id();
+        Schema::create('lokasi_aset', function (Blueprint $table) {
+            $table->string('id_lokasi', 25)->primary();
+            $table->string('nama_lokasi', 100);
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('pengembalian_aset');
+        Schema::dropIfExists('lokasi_aset');
     }
 };

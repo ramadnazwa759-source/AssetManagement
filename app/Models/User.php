@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+//user kalisawah
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;

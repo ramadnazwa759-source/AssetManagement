@@ -13,3 +13,7 @@ Route::get('/login', function () {
 Route::get('/dashboard', function () {
     return view('dashboard.index');
 });
+
+Route::get('/jenis-aset', function () {
+    return view('jenis-aset.index');
+});

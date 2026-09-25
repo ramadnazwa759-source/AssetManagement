@@ -45,7 +45,7 @@
             'title' => 'Jenis Aset',
             'description' => 'Kelola jenis dan stok aset',
             'icon' => '▤',
-            'link' => '#',
+            'link' => '/jenis-aset',
         ],
         [
             'title' => 'Lokasi Aset',

@@ -19,7 +19,4 @@ class KategoriAset extends Model
         'nama_kategori',
         'Deskripsi',
     ];
-
-    const CREATED_AT = 'Created_at';
-    const UPDATED_AT = 'Update_at';
 }

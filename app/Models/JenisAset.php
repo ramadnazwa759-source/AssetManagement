@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class JenisAset extends Model
 {
     protected $table = 'jenis_aset';
+
     protected $primaryKey = 'id_jenis';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -16,6 +19,7 @@ class JenisAset extends Model
         'id_sub_kategori_aset',
         'nama_jenis',
         'stok',
+        'status_jenis',
         'deskripsi',
     ];
 

@@ -19,7 +19,7 @@ class JenisAsetController extends Controller
             ->get();
 
         return view(
-            'asset-management.jenis.index',
+            'jenis-aset.index',
             compact('jenis')
         );
     }
@@ -30,7 +30,7 @@ class JenisAsetController extends Controller
         $subKategori = SubKategoriAset::all();
 
         return view(
-            'asset-management.jenis.create',
+            'jenis-aset.create',
             compact('subKategori')
         );
     }
@@ -105,7 +105,7 @@ class JenisAsetController extends Controller
         ])->findOrFail($id);
 
         return view(
-            'asset-management.jenis.show',
+            'jenis-aset.index',
             compact('jenis')
         );
     }
@@ -118,7 +118,7 @@ class JenisAsetController extends Controller
         $subKategori = SubKategoriAset::all();
 
         return view(
-            'asset-management.jenis.edit',
+            'jenis-aset.edit',
             compact('jenis', 'subKategori')
         );
     }

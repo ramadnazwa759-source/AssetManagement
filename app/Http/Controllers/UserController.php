@@ -8,12 +8,9 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    /**
-     * Menampilkan halaman login
-     */
     public function login()
     {
-        return view('login');
+        return view('auth.login');
     }
 
     /**

@@ -3,96 +3,39 @@
 @section('content')
 
 @php
-    /*
-    |--------------------------------------------------------------------------
-    | DUMMY DATA
-    |--------------------------------------------------------------------------
-    | Sementara masih frontend.
-    | Nanti data ini bisa diganti dengan data dari Controller/database.
-    */
 
-    $ringkasan = [
-        [
-            'label' => 'Total Aset',
-            'value' => '128',
-            'description' => 'Seluruh aset terdaftar',
-        ],
-        [
-            'label' => 'Tersedia',
-            'value' => '97',
-            'description' => 'Aset siap digunakan',
-        ],
-        [
-            'label' => 'Dipinjam',
-            'value' => '24',
-            'description' => 'Sedang digunakan',
-        ],
-        [
-            'label' => 'Perlu Perbaikan',
-            'value' => '7',
-            'description' => 'Aset perlu ditangani',
-        ],
-    ];
+$masterData = [
 
-    $masterData = [
-        [
-            'title' => 'Kategori & Subkategori',
-            'description' => 'Kelola pengelompokan aset',
-            'icon' => '▦',
-            'link' => '#',
-        ],
-        [
-            'title' => 'Jenis Aset',
-            'description' => 'Kelola jenis dan stok aset',
-            'icon' => '▤',
-            'link' => '/jenis-aset',
-        ],
-        [
-            'title' => 'Lokasi Aset',
-            'description' => 'Kelola lokasi penyimpanan aset',
-            'icon' => '⌖',
-            'link' => '#',
-        ],
-        [
-            'title' => 'Data Aset',
-            'description' => 'Lihat dan kelola data aset',
-            'icon' => '▣',
-            'link' => '#',
-        ],
-    ];
+    [
+        'title' => 'Kategori & Subkategori',
+        'description' => 'Kelola pengelompokan aset',
+        'icon' => '▦',
+        'link' => '#',
+    ],
 
-    $subkategori = [
-        [
-            'nama' => 'Tenda Camping',
-            'kategori' => 'Camping',
-            'gambar' => 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=150&q=80',
-        ],
-        [
-            'nama' => 'Peralatan Rafting',
-            'kategori' => 'Rafting',
-            'gambar' => 'https://images.unsplash.com/photo-1530866495561-507c8c8b4a4f?auto=format&fit=crop&w=150&q=80',
-        ],
-        [
-            'nama' => 'Peralatan Outbound',
-            'kategori' => 'Outbound',
-            'gambar' => 'https://images.unsplash.com/photo-1521336575822-6da63fb45455?auto=format&fit=crop&w=150&q=80',
-        ],
-        [
-            'nama' => 'Peralatan Paintball',
-            'kategori' => 'Paintball',
-            'gambar' => 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=150&q=80',
-        ],
-        [
-            'nama' => 'Peralatan Edukasi',
-            'kategori' => 'Edukasi',
-            'gambar' => 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=150&q=80',
-        ],
-        [
-            'nama' => 'Perlengkapan Umum',
-            'kategori' => 'Umum',
-            'gambar' => 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=150&q=80',
-        ],
-    ];
+    [
+        'title' => 'Jenis Aset',
+        'description' => 'Kelola jenis dan stok aset',
+        'icon' => '▤',
+        'link' => '/jenis-aset',
+    ],
+
+    [
+        'title' => 'Lokasi Aset',
+        'description' => 'Kelola lokasi penyimpanan aset',
+        'icon' => '⌖',
+        'link' => '#',
+    ],
+
+    [
+        'title' => 'Data Aset',
+        'description' => 'Lihat dan kelola data aset',
+        'icon' => '▣',
+        'link' => '#',
+    ],
+
+];
+
 @endphp
 
 
@@ -167,25 +110,76 @@
 
     <div class="summary-grid">
 
-        @foreach ($ringkasan as $item)
+        {{-- TOTAL ASET --}}
+        <div class="summary-item">
 
-            <div class="summary-item">
+            <span class="summary-label">
+                Total Aset
+            </span>
 
-                <span class="summary-label">
-                    {{ $item['label'] }}
-                </span>
+            <strong class="summary-value">
+                {{ $totalAset }}
+            </strong>
 
-                <strong class="summary-value">
-                    {{ $item['value'] }}
-                </strong>
+            <span class="summary-description">
+                Seluruh aset yang tercatat
+            </span>
 
-                <span class="summary-description">
-                    {{ $item['description'] }}
-                </span>
+        </div>
 
-            </div>
 
-        @endforeach
+        {{-- ASET TERSEDIA --}}
+        <div class="summary-item">
+
+            <span class="summary-label">
+                Tersedia
+            </span>
+
+            <strong class="summary-value">
+                {{ $asetTersedia }}
+            </strong>
+
+            <span class="summary-description">
+                Aset yang siap digunakan
+            </span>
+
+        </div>
+
+
+        {{-- ASET DIPINJAM --}}
+        <div class="summary-item">
+
+            <span class="summary-label">
+                Dipinjam
+            </span>
+
+            <strong class="summary-value">
+                {{ $asetDipinjam }}
+            </strong>
+
+            <span class="summary-description">
+                Aset yang sedang dipinjam
+            </span>
+
+        </div>
+
+
+        {{-- PERLU PERBAIKAN --}}
+        <div class="summary-item">
+
+            <span class="summary-label">
+                Perlu Perbaikan
+            </span>
+
+            <strong class="summary-value">
+                {{ $perluPerbaikan }}
+            </strong>
+
+            <span class="summary-description">
+                Aset dengan kondisi rusak
+            </span>
+
+        </div>
 
     </div>
 
@@ -275,17 +269,23 @@
 
     <div class="subcategory-list">
 
-        @foreach ($subkategori as $item)
+        @forelse ($subKategori as $item)
 
             <a href="#" class="subcategory-item">
 
                 {{-- GAMBAR BULAT KECIL --}}
                 <div class="subcategory-image">
 
-                    <img
-                        src="{{ $item['gambar'] }}"
-                        alt="{{ $item['nama'] }}"
-                    >
+                    @if (!empty($item->gambar))
+                        <img
+                            src="{{ asset('storage/' . $item->gambar) }}"
+                            alt="{{ $item->nama_subkategori }}"
+                        >
+                    @else
+                        <div class="subcategory-placeholder">
+                            {{ strtoupper(substr($item->nama_subkategori, 0, 1)) }}
+                        </div>
+                    @endif
 
                 </div>
 
@@ -294,11 +294,11 @@
                 <div class="subcategory-info">
 
                     <span class="subcategory-category">
-                        {{ $item['kategori'] }}
+                        Subkategori Aset
                     </span>
 
                     <h3>
-                        {{ $item['nama'] }}
+                        {{ $item->nama_subkategori }}
                     </h3>
 
                 </div>
@@ -311,7 +311,13 @@
 
             </a>
 
-        @endforeach
+        @empty
+
+            <div class="subcategory-empty">
+                Belum ada data subkategori aset.
+            </div>
+
+        @endforelse
 
     </div>
 
@@ -1270,6 +1276,21 @@ body {
         min-width: 42px;
     }
 
+}
+
+.subcategory-placeholder {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #edf5fb;
+    color: #0d4f8b;
+
+    font-size: 15px;
+    font-weight: 700;
 }
 
 </style>

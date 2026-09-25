@@ -46,8 +46,7 @@
                     <p>Masuk untuk mengelola data aset Kalisawah.</p>
                 </div>
 
-                <form class="login-form" action="#" method="POST" onsubmit="return false">
-                    @csrf
+                <form class="login-form" action="/dashboard" method="GET">
                     <div class="field-group">
                         <label for="username">Username</label>
                         <div class="input-wrap">

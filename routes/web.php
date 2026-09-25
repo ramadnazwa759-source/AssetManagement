@@ -14,6 +14,12 @@ Route::get('/dashboard', function () {
     return view('dashboard.index');
 });
 
+
+// jenis aset
 Route::get('/jenis-aset', function () {
     return view('jenis-aset.index');
 });
+Route::get('/jenis-aset/tambah', function () {
+    return view('jenis-aset.create');
+});
+

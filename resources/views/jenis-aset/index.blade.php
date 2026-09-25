@@ -97,7 +97,7 @@
 
         <div class="page-action">
 
-            <a href="#" class="add-button">
+            <a href="/jenis-aset/tambah" class="add-button">
                 <span>+</span>
                 Tambah Jenis Aset
             </a>

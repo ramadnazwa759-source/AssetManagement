@@ -3,19 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\KategoriAset;
+use App\Models\SubKategoriAset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class KategoriAsetController extends Controller
 {
     // Menampilkan semua kategori
-    public function index()
-    {
-        $kategori = KategoriAset::all();
+   public function index()
+{
+    $kategori = KategoriAset::all();
+    $subKategori = SubKategoriAset::all();
 
-        return view('kategori.index', compact('kategori'));
-    }
-
+    return view('kategori.index', compact('kategori', 'subKategori'));
+}
     // Menampilkan form tambah kategori
     public function create()
     {

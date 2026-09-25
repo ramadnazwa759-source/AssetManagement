@@ -18,12 +18,10 @@ class SubKategoriAset extends Model
         'id_sub_kategori',
         'id_kategori',
         'nama_sub_kategori',
-        'Gambar',
-        'Deskripsi',
+        'gambar',
+        'deskripsi',
     ];
 
-    const CREATED_AT = 'Created_at';
-    const UPDATED_AT = 'Update_at';
 
     public function kategori()
     {

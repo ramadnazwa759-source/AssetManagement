@@ -5,7 +5,19 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\KategoriAsetController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
+});
+
+Route::get('/login', function () {
+    return view('auth.login');
+});
+
+Route::get('/dashboard', function () {
+    return view('dashboard.index');
+});
+
+Route::get('/jenis-aset', function () {
+    return view('jenis-aset.index');
 });
 Route::get('/login', [UserController::class, 'login'])->name('login');
 Route::post('/login', [UserController::class, 'authenticate'])->name('login.process');

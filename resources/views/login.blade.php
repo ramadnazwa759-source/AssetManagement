@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -437,6 +438,37 @@
         });
 
     </script>
+=======
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+
+    <h2>Login Admin</h2>
+
+    @if ($errors->any())
+        <div>
+            {{ $errors->first() }}
+        </div>
+    @endif
+
+    <form action="{{ route('login.process') }}" method="POST">
+        @csrf
+
+        <div>
+            <label>Email</label>
+            <input type="email" name="email" required>
+        </div>
+
+        <div>
+            <label>Password</label>
+            <input type="password" name="password" required>
+        </div>
+
+        <button type="submit">Login</button>
+    </form>
+>>>>>>> 7bd0d8588f5b6db888808d7a5eafad67fa0dc1ac
 
 </body>
 </html>

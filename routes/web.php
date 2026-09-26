@@ -34,7 +34,7 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
 
     // Kategori Aset
-    Route::resource('kategori', KategoriAsetController::class);
+    Route::resource('/kategori', KategoriAsetController::class);
 
 });
 

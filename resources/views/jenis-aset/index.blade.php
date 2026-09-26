@@ -2,6 +2,12 @@
 
 @section('content')
 
+@if (session('success'))
+    <div class="alert-success">
+        ✓ {{ session('success') }}
+    </div>
+@endif
+
 {{-- =========================================================
      HALAMAN JENIS ASET
 ========================================================= --}}
@@ -309,7 +315,6 @@
     </div>
 
 </section>
-
 
 @endsection
 
@@ -830,6 +835,31 @@ tbody tr:hover {
     color: #9aa5ae;
 
     text-align: center;
+
+}
+
+
+/* =========================================================
+   ALERT SUCCESS
+========================================================= */
+
+.alert-success {
+
+    margin-bottom: 20px;
+
+    padding: 13px 16px;
+
+    background: #f0faf4;
+
+    border: 1px solid #c9e8d5;
+
+    border-radius: 9px;
+
+    color: #267348;
+
+    font-size: 13px;
+
+    font-weight: 500;
 
 }
 

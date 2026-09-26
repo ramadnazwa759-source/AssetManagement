@@ -58,44 +58,22 @@
             @csrf
 
 
-            {{-- ERROR VALIDATION --}}
-            @if ($errors->any())
-
-                <div class="alert-error">
-
-                    <strong>Data belum dapat disimpan.</strong>
-
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-
-                </div>
-
-            @endif
-
-
             {{-- KODE JENIS ASET --}}
             <div class="form-group">
 
                 <label for="id_jenis">
                     Kode Jenis Aset
-                    <span>*</span>
                 </label>
 
                 <input
                     type="text"
                     id="id_jenis"
-                    name="id_jenis"
-                    value="{{ old('id_jenis') }}"
-                    placeholder="Contoh: JA-001"
-                    maxlength="25"
-                    required
+                    value="{{ $idJenisBaru }}"
+                    readonly
                 >
 
                 <small>
-                    Gunakan kode yang unik untuk jenis aset.
+                    ID jenis aset dibuat otomatis oleh sistem dan tidak dapat diubah.
                 </small>
 
             </div>
@@ -112,6 +90,7 @@
                 <select
                     id="id_sub_kategori_aset"
                     name="id_sub_kategori_aset"
+                    class="@error('id_sub_kategori_aset') input-error @enderror"
                     required
                 >
 
@@ -132,14 +111,22 @@
 
                 </select>
 
-                <small>
-                    Pilih sub kategori yang sesuai dengan jenis aset.
-                </small>
+                @error('id_sub_kategori_aset')
+                    <small class="error-message">
+                        {{ $message }}
+                    </small>
+                @enderror
+
+                @if (!$errors->has('id_sub_kategori_aset'))
+                    <small>
+                        Pilih sub kategori yang sesuai dengan jenis aset.
+                    </small>
+                @endif
 
             </div>
 
 
-            {{-- NAMA --}}
+            {{-- NAMA JENIS ASET --}}
             <div class="form-group">
 
                 <label for="nama_jenis">
@@ -154,8 +141,15 @@
                     value="{{ old('nama_jenis') }}"
                     placeholder="Contoh: Tenda"
                     maxlength="100"
+                    class="@error('nama_jenis') input-error @enderror"
                     required
                 >
+
+                @error('nama_jenis')
+                    <small class="error-message">
+                        {{ $message }}
+                    </small>
+                @enderror
 
             </div>
 
@@ -175,12 +169,21 @@
                     value="{{ old('stok') }}"
                     placeholder="Masukkan jumlah stok"
                     min="0"
+                    class="@error('stok') input-error @enderror"
                     required
                 >
 
-                <small>
-                    Jumlah stok awal yang akan dibuat menjadi data aset.
-                </small>
+                @error('stok')
+                    <small class="error-message">
+                        {{ $message }}
+                    </small>
+                @enderror
+
+                @if (!$errors->has('stok'))
+                    <small>
+                        Jumlah stok awal yang akan dibuat menjadi data aset.
+                    </small>
+                @endif
 
             </div>
 
@@ -197,7 +200,14 @@
                     name="deskripsi"
                     rows="5"
                     placeholder="Masukkan deskripsi jenis aset..."
+                    class="@error('deskripsi') input-error @enderror"
                 >{{ old('deskripsi') }}</textarea>
+
+                @error('deskripsi')
+                    <small class="error-message">
+                        {{ $message }}
+                    </small>
+                @enderror
 
             </div>
 
@@ -216,8 +226,6 @@
                         <input
                             type="radio"
                             id="statusAktif"
-                            name="status_jenis"
-                            value="Aktif"
                             checked
                             disabled
                         >
@@ -510,6 +518,33 @@
 
 
 /* =========================================================
+   VALIDATION ERROR
+========================================================= */
+
+.input-error {
+    border-color: #d9534f !important;
+
+    background: #fff8f8 !important;
+}
+
+.input-error:focus {
+    border-color: #d9534f !important;
+
+    box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.10) !important;
+}
+
+.error-message {
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    color: #d9534f !important;
+}
+
+
+/* =========================================================
    HELP TEXT
 ========================================================= */
 
@@ -521,43 +556,6 @@
     font-size: 11px;
 
     color: #8a98a2;
-}
-
-
-/* =========================================================
-   ERROR
-========================================================= */
-
-.alert-error {
-    margin-bottom: 20px;
-
-    padding: 13px 15px;
-
-    background: #fff5f5;
-
-    border: 1px solid #f0d2d2;
-
-    border-radius: 9px;
-
-    color: #a33a3a;
-
-    font-size: 12px;
-}
-
-.alert-error strong {
-    display: block;
-
-    margin-bottom: 6px;
-}
-
-.alert-error ul {
-    margin: 0;
-
-    padding-left: 18px;
-}
-
-.alert-error li {
-    margin-bottom: 3px;
 }
 
 

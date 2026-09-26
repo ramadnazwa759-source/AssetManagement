@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\KategoriAsetController;
 use App\Http\Controllers\SubKategoriAsetController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\JenisAsetController;
 
 
 // =====================================================

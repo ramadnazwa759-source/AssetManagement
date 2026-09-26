@@ -26,75 +26,89 @@ class JenisAsetController extends Controller
 
     // Menampilkan form tambah jenis aset
     public function create()
-    {
-        $subKategori = SubKategoriAset::all();
+{
+    $subKategori = SubKategoriAset::all();
 
-        return view(
-            'jenis-aset.create',
-            compact('subKategori')
-        );
+    $lastJenis = JenisAset::orderBy('id_jenis', 'desc')->first();
+
+    if ($lastJenis) {
+        $nomorTerakhir = (int) str_replace('JA-', '', $lastJenis->id_jenis);
+        $nomorBaru = $nomorTerakhir + 1;
+    } else {
+        $nomorBaru = 1;
     }
+
+    $idJenisBaru = 'JA-' . str_pad($nomorBaru, 3, '0', STR_PAD_LEFT);
+
+    return view(
+        'jenis-aset.create',
+        compact('subKategori', 'idJenisBaru')
+    );
+}
 
     // Menyimpan jenis aset baru dan membuat aset sesuai stok
     public function store(Request $request)
-    {
-        // Validasi data
-        $validated = $request->validate([
-            'id_jenis' => 'required|string|max:25|unique:jenis_aset,id_jenis',
+{
+    $validated = $request->validate([
+        'id_sub_kategori_aset' => 'required|exists:sub_kategori_aset,id_sub_kategori',
+        'nama_jenis' => 'required|string|max:100|unique:jenis_aset,nama_jenis',
+        'stok' => 'required|integer|min:0',
+        'deskripsi' => 'nullable|string',
+    ]);
 
-            'id_sub_kategori_aset' =>
-                'required|exists:sub_kategori_aset,id_sub_kategori',
+    DB::transaction(function () use ($validated) {
 
-            'nama_jenis' =>
-                'required|string|max:100|unique:jenis_aset,nama_jenis',
+        $lastJenis = JenisAset::orderBy('id_jenis', 'desc')->first();
 
-            'stok' =>
-                'required|integer|min:0',
+        if ($lastJenis) {
+            $nomorTerakhir = (int) str_replace('JA-', '', $lastJenis->id_jenis);
+            $nomorBaru = $nomorTerakhir + 1;
+        } else {
+            $nomorBaru = 1;
+        }
 
-            'deskripsi' =>
-                'nullable|string',
+        $idJenisBaru = 'JA-' . str_pad(
+            $nomorBaru,
+            3,
+            '0',
+            STR_PAD_LEFT
+        );
+
+        $jenis = JenisAset::create([
+            'id_jenis' => $idJenisBaru,
+            'id_sub_kategori_aset' => $validated['id_sub_kategori_aset'],
+            'nama_jenis' => $validated['nama_jenis'],
+            'stok' => $validated['stok'],
+            'status_jenis' => 'Aktif',
+            'deskripsi' => $validated['deskripsi'] ?? null,
         ]);
 
-        DB::transaction(function () use ($validated) {
+        for ($i = 1; $i <= $validated['stok']; $i++) {
 
-            // Menyimpan jenis aset
-            $jenis = JenisAset::create([
-                'id_jenis' => $validated['id_jenis'],
-                'id_sub_kategori_aset' => $validated['id_sub_kategori_aset'],
-                'nama_jenis' => $validated['nama_jenis'],
-                'stok' => $validated['stok'],
-                'status_jenis' => 'Aktif',
-                'deskripsi' => $validated['deskripsi'] ?? null,
+            Aset::create([
+                'kode_aset' => $this->generateKodeAset(
+                    $jenis->nama_jenis,
+                    $i
+                ),
+                'id_jenis' => $jenis->id_jenis,
+                'id_lokasi' => null,
+                'nama_aset' => $jenis->nama_jenis,
+                'tanggal_beli' => null,
+                'kondisi_aset' => 'Baik',
+                'status_aset' => 'Tersedia',
+                'gambar' => null,
+                'keterangan' => null,
             ]);
+        }
+    });
 
-            // Membuat data aset sesuai jumlah stok
-            for ($i = 1; $i <= $validated['stok']; $i++) {
-
-                Aset::create([
-                    'kode_aset' => $this->generateKodeAset(
-                        $jenis->nama_jenis,
-                        $i
-                    ),
-
-                    'id_jenis' => $jenis->id_jenis,
-                    'id_lokasi' => null,
-                    'nama_aset' => $jenis->nama_jenis,
-                    'tanggal_beli' => null,
-                    'kondisi_aset' => 'Baik',
-                    'status_aset' => 'Tersedia',
-                    'gambar' => null,
-                    'keterangan' => null,
-                ]);
-            }
-        });
-
-        return redirect()
-            ->route('jenis-aset.index')
-            ->with(
-                'success',
-                'Jenis aset dan stok berhasil ditambahkan.'
-            );
-    }
+    return redirect()
+        ->route('jenis-aset.index')
+        ->with(
+            'success',
+            'Jenis aset dan stok berhasil ditambahkan.'
+        );
+}
 
     // Menampilkan detail jenis aset
     public function show(string $id)

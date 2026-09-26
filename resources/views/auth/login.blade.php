@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 
+
+
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -438,7 +440,7 @@
         });
 
     </script>
-=======
+
 <html>
 <head>
     <title>Login</title>
@@ -468,7 +470,7 @@
 
         <button type="submit">Login</button>
     </form>
->>>>>>> 7bd0d8588f5b6db888808d7a5eafad67fa0dc1ac
+
 
 </body>
 </html>

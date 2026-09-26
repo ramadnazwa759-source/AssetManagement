@@ -9,7 +9,7 @@
 
         <div class="header-left">
 
-            <a href="/jenis-aset" class="back-button">
+            <a href="{{ route('jenis-aset.index') }}" class="back-button">
                 ←
             </a>
 
@@ -48,46 +48,108 @@
         </div>
 
 
-        <form action="#" method="POST" id="formJenisAset">
+        {{-- FORM --}}
+        <form
+            action="{{ route('jenis-aset.store') }}"
+            method="POST"
+            id="formJenisAset"
+        >
 
-            {{-- KODE --}}
+            @csrf
+
+
+            {{-- KODE JENIS ASET --}}
             <div class="form-group">
 
-                <label for="kode">
+                <label for="id_jenis">
                     Kode Jenis Aset
-                    <span>*</span>
                 </label>
 
                 <input
                     type="text"
-                    id="kode"
-                    name="kode"
-                    placeholder="Contoh: JA-001"
-                    required
+                    id="id_jenis"
+                    value="{{ $idJenisBaru }}"
+                    readonly
                 >
 
                 <small>
-                    Gunakan kode yang unik untuk jenis aset.
+                    ID jenis aset dibuat otomatis oleh sistem dan tidak dapat diubah.
                 </small>
 
             </div>
 
 
-            {{-- NAMA --}}
+            {{-- SUB KATEGORI --}}
             <div class="form-group">
 
-                <label for="nama">
+                <label for="id_sub_kategori_aset">
+                    Sub Kategori Aset
+                    <span>*</span>
+                </label>
+
+                <select
+                    id="id_sub_kategori_aset"
+                    name="id_sub_kategori_aset"
+                    class="@error('id_sub_kategori_aset') input-error @enderror"
+                    required
+                >
+
+                    <option value="">
+                        Pilih Sub Kategori
+                    </option>
+
+                    @foreach ($subKategori as $item)
+
+                        <option
+                            value="{{ $item->id_sub_kategori }}"
+                            {{ old('id_sub_kategori_aset') == $item->id_sub_kategori ? 'selected' : '' }}
+                        >
+                            {{ $item->nama_sub_kategori }}
+                        </option>
+
+                    @endforeach
+
+                </select>
+
+                @error('id_sub_kategori_aset')
+                    <small class="error-message">
+                        {{ $message }}
+                    </small>
+                @enderror
+
+                @if (!$errors->has('id_sub_kategori_aset'))
+                    <small>
+                        Pilih sub kategori yang sesuai dengan jenis aset.
+                    </small>
+                @endif
+
+            </div>
+
+
+            {{-- NAMA JENIS ASET --}}
+            <div class="form-group">
+
+                <label for="nama_jenis">
                     Nama Jenis Aset
                     <span>*</span>
                 </label>
 
                 <input
                     type="text"
-                    id="nama"
-                    name="nama"
+                    id="nama_jenis"
+                    name="nama_jenis"
+                    value="{{ old('nama_jenis') }}"
                     placeholder="Contoh: Tenda"
+                    maxlength="100"
+                    class="@error('nama_jenis') input-error @enderror"
                     required
                 >
+
+                @error('nama_jenis')
+                    <small class="error-message">
+                        {{ $message }}
+                    </small>
+                @enderror
 
             </div>
 
@@ -95,23 +157,33 @@
             {{-- JUMLAH STOK --}}
             <div class="form-group">
 
-                <label for="jumlah">
+                <label for="stok">
                     Jumlah Stok
                     <span>*</span>
                 </label>
 
                 <input
                     type="number"
-                    id="jumlah"
-                    name="jumlah"
+                    id="stok"
+                    name="stok"
+                    value="{{ old('stok') }}"
                     placeholder="Masukkan jumlah stok"
-                    min="1"
+                    min="0"
+                    class="@error('stok') input-error @enderror"
                     required
                 >
 
-                <small>
-                    Jumlah stok awal yang tersedia untuk jenis aset ini.
-                </small>
+                @error('stok')
+                    <small class="error-message">
+                        {{ $message }}
+                    </small>
+                @enderror
+
+                @if (!$errors->has('stok'))
+                    <small>
+                        Jumlah stok awal yang akan dibuat menjadi data aset.
+                    </small>
+                @endif
 
             </div>
 
@@ -128,7 +200,14 @@
                     name="deskripsi"
                     rows="5"
                     placeholder="Masukkan deskripsi jenis aset..."
-                ></textarea>
+                    class="@error('deskripsi') input-error @enderror"
+                >{{ old('deskripsi') }}</textarea>
+
+                @error('deskripsi')
+                    <small class="error-message">
+                        {{ $message }}
+                    </small>
+                @enderror
 
             </div>
 
@@ -143,21 +222,22 @@
                 <div class="status-option">
 
                     <div class="status-radio">
+
                         <input
                             type="radio"
                             id="statusAktif"
-                            name="status"
-                            value="aktif"
                             checked
+                            disabled
                         >
 
                         <label for="statusAktif">
                             Aktif
                         </label>
+
                     </div>
 
                     <span class="status-info">
-                        Jenis aset dapat digunakan dalam pengelolaan aset.
+                        Jenis aset baru otomatis dibuat dengan status aktif.
                     </span>
 
                 </div>
@@ -173,12 +253,14 @@
                 </div>
 
                 <div>
+
                     <strong>Informasi stok</strong>
 
                     <p>
                         Jumlah stok yang ditambahkan akan menjadi jumlah awal
                         aset untuk jenis aset ini.
                     </p>
+
                 </div>
 
             </div>
@@ -187,11 +269,17 @@
             {{-- ACTION --}}
             <div class="form-actions">
 
-                <a href="/jenis-aset" class="cancel-button">
+                <a
+                    href="{{ route('jenis-aset.index') }}"
+                    class="cancel-button"
+                >
                     Batal
                 </a>
 
-                <button type="submit" class="save-button">
+                <button
+                    type="submit"
+                    class="save-button"
+                >
                     Simpan Jenis Aset
                 </button>
 
@@ -371,10 +459,13 @@
 }
 
 
-/* INPUT */
+/* =========================================================
+   INPUT
+========================================================= */
 
 .form-group input[type="text"],
 .form-group input[type="number"],
+.form-group select,
 .form-group textarea {
     width: 100%;
 
@@ -400,7 +491,8 @@
 }
 
 .form-group input[type="text"],
-.form-group input[type="number"] {
+.form-group input[type="number"],
+.form-group select {
     height: 42px;
 }
 
@@ -412,6 +504,7 @@
 
 .form-group input[type="text"]:focus,
 .form-group input[type="number"]:focus,
+.form-group select:focus,
 .form-group textarea:focus {
     border-color: #4f83a8;
 
@@ -424,7 +517,36 @@
 }
 
 
-/* HELP TEXT */
+/* =========================================================
+   VALIDATION ERROR
+========================================================= */
+
+.input-error {
+    border-color: #d9534f !important;
+
+    background: #fff8f8 !important;
+}
+
+.input-error:focus {
+    border-color: #d9534f !important;
+
+    box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.10) !important;
+}
+
+.error-message {
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    color: #d9534f !important;
+}
+
+
+/* =========================================================
+   HELP TEXT
+========================================================= */
 
 .form-group small {
     display: block;
@@ -481,7 +603,7 @@
 
     color: #27804c;
 
-    cursor: pointer;
+    cursor: default;
 }
 
 .status-info {
@@ -678,23 +800,6 @@
 }
 
 </style>
-
-@endpush
-
-
-@push('scripts')
-
-<script>
-
-document.getElementById('formJenisAset').addEventListener('submit', function(event) {
-
-    event.preventDefault();
-
-    alert('Data jenis aset siap disimpan ke database.');
-
-});
-
-</script>
 
 @endpush
 

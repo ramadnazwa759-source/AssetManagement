@@ -2,61 +2,11 @@
 
 @section('content')
 
-@php
-    /*
-    |--------------------------------------------------------------------------
-    | DUMMY DATA JENIS ASET
-    |--------------------------------------------------------------------------
-    | Sementara masih menggunakan data dummy karena halaman ini
-    | masih dalam tahap frontend dan belum menggunakan Controller.
-    */
-
-    $jenisAset = [
-        [
-            'kode' => 'JA-001',
-            'nama' => 'Tenda',
-            'jumlah' => 25,
-            'status' => 'aktif',
-            'deskripsi' => 'Jenis aset berupa tenda untuk kegiatan camping.',
-        ],
-        [
-            'kode' => 'JA-002',
-            'nama' => 'Peralatan Rafting',
-            'jumlah' => 35,
-            'status' => 'aktif',
-            'deskripsi' => 'Peralatan yang digunakan untuk kegiatan rafting.',
-        ],
-        [
-            'kode' => 'JA-003',
-            'nama' => 'Peralatan Outbound',
-            'jumlah' => 28,
-            'status' => 'aktif',
-            'deskripsi' => 'Peralatan pendukung kegiatan outbound.',
-        ],
-        [
-            'kode' => 'JA-004',
-            'nama' => 'Peralatan Paintball',
-            'jumlah' => 20,
-            'status' => 'nonaktif',
-            'deskripsi' => 'Peralatan yang digunakan untuk kegiatan paintball.',
-        ],
-        [
-            'kode' => 'JA-005',
-            'nama' => 'Perlengkapan Edukasi',
-            'jumlah' => 12,
-            'status' => 'aktif',
-            'deskripsi' => 'Perlengkapan yang digunakan untuk kegiatan edukasi.',
-        ],
-        [
-            'kode' => 'JA-006',
-            'nama' => 'Peralatan Umum',
-            'jumlah' => 18,
-            'status' => 'aktif',
-            'deskripsi' => 'Peralatan umum untuk kebutuhan operasional.',
-        ],
-    ];
-@endphp
-
+@if (session('success'))
+    <div class="alert-success">
+        ✓ {{ session('success') }}
+    </div>
+@endif
 
 {{-- =========================================================
      HALAMAN JENIS ASET
@@ -93,11 +43,9 @@
         </div>
 
 
-        {{-- Tombol tambah jenis aset --}}
-
         <div class="page-action">
 
-            <a href="/jenis-aset/tambah" class="add-button">
+            <a href="{{ route('jenis-aset.create') }}" class="add-button">
                 <span>+</span>
                 Tambah Jenis Aset
             </a>
@@ -116,7 +64,7 @@
         <div class="info-left">
 
             <strong>
-                {{ count($jenisAset) }}
+                {{ $jenis->count() }}
             </strong>
 
             <span>
@@ -139,8 +87,6 @@
     <div class="table-card">
 
 
-        {{-- Header tabel --}}
-
         <div class="table-header">
 
             <div>
@@ -157,8 +103,6 @@
 
         </div>
 
-
-        {{-- Tabel --}}
 
         <div class="table-wrapper">
 
@@ -203,7 +147,7 @@
 
                 <tbody>
 
-                    @forelse ($jenisAset as $index => $item)
+                    @forelse ($jenis as $index => $item)
 
                         <tr>
 
@@ -220,7 +164,7 @@
                             <td>
 
                                 <span class="asset-code">
-                                    {{ $item['kode'] }}
+                                    {{ $item->id_jenis }}
                                 </span>
 
                             </td>
@@ -231,7 +175,7 @@
                             <td>
 
                                 <div class="asset-name">
-                                    {{ $item['nama'] }}
+                                    {{ $item->nama_jenis }}
                                 </div>
 
                             </td>
@@ -242,7 +186,7 @@
                             <td>
 
                                 <span class="jumlah">
-                                    {{ $item['jumlah'] }}
+                                    {{ $item->stok }}
                                 </span>
 
                             </td>
@@ -252,7 +196,7 @@
 
                             <td>
 
-                                @if ($item['status'] === 'aktif')
+                                @if ($item->status_jenis === 'Aktif')
 
                                     <span class="status-badge active">
                                         Aktif
@@ -274,7 +218,7 @@
                             <td>
 
                                 <span class="description">
-                                    {{ $item['deskripsi'] }}
+                                    {{ $item->deskripsi ?: '-' }}
                                 </span>
 
                             </td>
@@ -289,45 +233,57 @@
 
                                     {{-- TAMBAH STOK --}}
 
-                                    <a href="#"
-                                       class="action-button stock">
-
+                                    <a
+                                        href="{{ route('jenis-aset.edit', $item->id_jenis) }}"
+                                        class="action-button stock"
+                                    >
                                         + Stok
-
                                     </a>
 
 
                                     {{-- EDIT --}}
 
-                                    <a href="#"
-                                       class="action-button edit">
-
+                                    <a
+                                        href="{{ route('jenis-aset.edit', $item->id_jenis) }}"
+                                        class="action-button edit"
+                                    >
                                         Edit
-
                                     </a>
 
 
                                     {{-- UBAH STATUS --}}
 
-                                    @if ($item['status'] === 'aktif')
+                                    <form
+                                        action="{{ route('jenis-aset.status', $item->id_jenis) }}"
+                                        method="POST"
+                                        style="display: inline;"
+                                    >
 
-                                        <a href="#"
-                                           class="action-button deactivate">
+                                        @csrf
 
-                                            Nonaktifkan
+                                        @method('PATCH')
 
-                                        </a>
+                                        @if ($item->status_jenis === 'Aktif')
 
-                                    @else
+                                            <button
+                                                type="submit"
+                                                class="action-button deactivate"
+                                            >
+                                                Nonaktifkan
+                                            </button>
 
-                                        <a href="#"
-                                           class="action-button activate">
+                                        @else
 
-                                            Aktifkan
+                                            <button
+                                                type="submit"
+                                                class="action-button activate"
+                                            >
+                                                Aktifkan
+                                            </button>
 
-                                        </a>
+                                        @endif
 
-                                    @endif
+                                    </form>
 
 
                                 </div>
@@ -360,9 +316,7 @@
 
 </section>
 
-
 @endsection
-
 
 
 {{-- =========================================================
@@ -372,11 +326,6 @@
 @push('styles')
 
 <style>
-
-
-/* =========================================================
-   PAGE
-========================================================= */
 
 .page-section {
 
@@ -388,10 +337,6 @@
 
 }
 
-
-/* =========================================================
-   HEADER
-========================================================= */
 
 .page-top {
 
@@ -482,10 +427,6 @@
 }
 
 
-/* =========================================================
-   TOMBOL TAMBAH
-========================================================= */
-
 .add-button {
 
     display: inline-flex;
@@ -530,10 +471,6 @@
 
 }
 
-
-/* =========================================================
-   INFORMASI DATA
-========================================================= */
 
 .data-info {
 
@@ -592,10 +529,6 @@
 }
 
 
-/* =========================================================
-   TABLE CARD
-========================================================= */
-
 .table-card {
 
     background: #fff;
@@ -647,10 +580,6 @@
 
 }
 
-
-/* =========================================================
-   TABLE
-========================================================= */
 
 .table-wrapper {
 
@@ -727,10 +656,6 @@ tbody tr:hover {
 }
 
 
-/* =========================================================
-   KODE
-========================================================= */
-
 .asset-code {
 
     display: inline-block;
@@ -750,10 +675,6 @@ tbody tr:hover {
 }
 
 
-/* =========================================================
-   NAMA
-========================================================= */
-
 .asset-name {
 
     color: #263746;
@@ -763,10 +684,6 @@ tbody tr:hover {
 }
 
 
-/* =========================================================
-   JUMLAH
-========================================================= */
-
 .jumlah {
 
     color: #263746;
@@ -775,10 +692,6 @@ tbody tr:hover {
 
 }
 
-
-/* =========================================================
-   STATUS
-========================================================= */
 
 .status-badge {
 
@@ -813,10 +726,6 @@ tbody tr:hover {
 }
 
 
-/* =========================================================
-   DESKRIPSI
-========================================================= */
-
 .description {
 
     display: block;
@@ -831,10 +740,6 @@ tbody tr:hover {
 
 }
 
-
-/* =========================================================
-   ACTION
-========================================================= */
 
 .action-group {
 
@@ -859,15 +764,21 @@ tbody tr:hover {
 
     padding: 6px 8px;
 
+    border: none;
+
     border-radius: 6px;
 
     font-size: 10px;
+
+    font-family: inherit;
 
     font-weight: 600;
 
     text-decoration: none;
 
     white-space: nowrap;
+
+    cursor: pointer;
 
     transition: .2s ease;
 
@@ -881,8 +792,6 @@ tbody tr:hover {
 }
 
 
-/* TAMBAH STOK */
-
 .action-button.stock {
 
     background: #edf7f1;
@@ -891,8 +800,6 @@ tbody tr:hover {
 
 }
 
-
-/* EDIT */
 
 .action-button.edit {
 
@@ -903,8 +810,6 @@ tbody tr:hover {
 }
 
 
-/* NONAKTIFKAN */
-
 .action-button.deactivate {
 
     background: #fff4e8;
@@ -914,8 +819,6 @@ tbody tr:hover {
 }
 
 
-/* AKTIFKAN */
-
 .action-button.activate {
 
     background: #edf7f1;
@@ -924,10 +827,6 @@ tbody tr:hover {
 
 }
 
-
-/* =========================================================
-   DATA KOSONG
-========================================================= */
 
 .empty-data {
 
@@ -941,8 +840,29 @@ tbody tr:hover {
 
 
 /* =========================================================
-   TABLET
+   ALERT SUCCESS
 ========================================================= */
+
+.alert-success {
+
+    margin-bottom: 20px;
+
+    padding: 13px 16px;
+
+    background: #f0faf4;
+
+    border: 1px solid #c9e8d5;
+
+    border-radius: 9px;
+
+    color: #267348;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+}
+
 
 @media (max-width: 900px) {
 
@@ -970,10 +890,6 @@ tbody tr:hover {
 
 }
 
-
-/* =========================================================
-   MOBILE
-========================================================= */
 
 @media (max-width: 600px) {
 

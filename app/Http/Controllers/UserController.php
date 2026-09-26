@@ -10,7 +10,7 @@ class UserController extends Controller
 {
     public function login()
     {
-        return view('login');
+        return view('auth.login');
     }
 
     /**
@@ -26,7 +26,7 @@ class UserController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect()->route('kategori.index');
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([
@@ -44,6 +44,6 @@ class UserController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect('auth.login');
     }
 }

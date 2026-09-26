@@ -30,13 +30,23 @@ class Aset extends Model
         'tanggal_beli' => 'date',
     ];
 
-    // Relasi ke Jenis Aset
+    // Relasi ke jenis aset
     public function jenis()
     {
         return $this->belongsTo(
             JenisAset::class,
             'id_jenis',
             'id_jenis'
+        );
+    }
+
+    // Relasi ke lokasi aset
+    public function lokasi()
+    {
+        return $this->belongsTo(
+            LokasiAset::class,
+            'id_lokasi',
+            'id_lokasi'
         );
     }
 }

@@ -69,16 +69,4 @@ class KategoriAsetController extends Controller
             ->route('kategori.index')
             ->with('success', 'Kategori berhasil diubah.');
     }
-
-    // Menghapus kategori
-    public function destroy($id)
-    {
-        $kategori = KategoriAset::findOrFail($id);
-
-        $kategori->delete();
-
-        return redirect()
-            ->route('kategori.index')
-            ->with('success', 'Kategori berhasil dihapus.');
-    }
 }

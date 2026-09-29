@@ -65,15 +65,4 @@ class SubKategoriAsetController extends Controller
             ->route('kategori.index')
             ->with('success', 'Sub kategori berhasil diubah.');
     }
-
-    public function destroy($id)
-    {
-        $subKategori = SubKategoriAset::findOrFail($id);
-
-        $subKategori->delete();
-
-        return redirect()
-            ->route('kategori.index')
-            ->with('success', 'Sub kategori berhasil dihapus.');
-    }
 }

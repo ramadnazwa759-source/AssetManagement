@@ -67,4 +67,31 @@ class PeminjamanAsetController extends Controller
             compact('peminjaman')
         );
     }
+
+     // Menampilkan form tambah peminjaman
+    public function create()
+    {
+        $jenis = JenisAset::where(
+            'status_jenis',
+            'Aktif'
+        )
+            ->withCount([
+                'aset as stok_tersedia' => function ($query) {
+                    $query->where(
+                        'kondisi_aset',
+                        'Baik'
+                    )
+                    ->where(
+                        'status_aset',
+                        'Tersedia'
+                    );
+                }
+            ])
+            ->get();
+
+        return view(
+            'asset-management.peminjaman.create',
+            compact('jenis')
+        );
+    }
 }

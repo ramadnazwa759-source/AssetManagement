@@ -210,26 +210,40 @@ class JenisAsetController extends Controller
     // Mengaktifkan dan menonaktifkan jenis aset
     public function ubahStatus(string $id)
     {
-        $jenis = JenisAset::findOrFail($id);
+    $jenis = JenisAset::findOrFail($id);
 
-        if ($jenis->status_jenis === 'Aktif') {
-            $jenis->update([
-                'status_jenis' => 'Nonaktif'
+    if ($jenis->status_jenis === 'Aktif') {
+
+        $jenis->update([
+            'status_jenis' => 'Nonaktif'
+        ]);
+
+        // Menonaktifkan seluruh unit aset
+        $jenis->aset()->update([
+            'status_aset' => 'Nonaktif'
+        ]);
+
+        $pesan = 'Jenis aset dan unit aset berhasil dinonaktifkan.';
+    } else {
+
+        $jenis->update([
+            'status_jenis' => 'Aktif'
+        ]);
+
+        // Mengaktifkan kembali unit aset
+        $jenis->aset()
+            ->where('status_aset', 'Nonaktif')
+            ->update([
+                'status_aset' => 'Tersedia'
             ]);
 
-            $pesan = 'Jenis aset berhasil dinonaktifkan.';
-        } else {
-            $jenis->update([
-                'status_jenis' => 'Aktif'
-            ]);
-
-            $pesan = 'Jenis aset berhasil diaktifkan.';
-        }
-
-        return redirect()
-            ->route('jenis-aset.index')
-            ->with('success', $pesan);
+        $pesan = 'Jenis aset dan unit aset berhasil diaktifkan.';
     }
+
+    return redirect()
+        ->route('jenis-aset.index')
+        ->with('success', $pesan);
+}
 
     // Membuat kode unit aset
     private function generateKodeAset(string $namaJenis, int $nomor)

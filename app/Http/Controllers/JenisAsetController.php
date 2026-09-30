@@ -92,4 +92,31 @@ class JenisAsetController extends Controller
                 'Jenis aset dan stok berhasil ditambahkan.'
             );
     }
+
+    // Menampilkan detail jenis aset
+    public function show(string $id)
+    {
+        $jenis = JenisAset::with([
+            'subKategori',
+            'aset'
+        ])->findOrFail($id);
+
+        return view(
+            'asset-management.jenis.show',
+            compact('jenis')
+        );
+    }
+
+    // Menampilkan form ubah jenis aset
+    public function edit(string $id)
+    {
+        $jenis = JenisAset::findOrFail($id);
+
+        $subKategori = SubKategoriAset::all();
+
+        return view(
+            'asset-management.jenis.edit',
+            compact('jenis', 'subKategori')
+        );
+    }
 }

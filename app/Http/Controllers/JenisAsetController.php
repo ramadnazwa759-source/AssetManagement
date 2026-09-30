@@ -207,4 +207,53 @@ class JenisAsetController extends Controller
             );
     }
 
+    // Mengaktifkan dan menonaktifkan jenis aset
+    public function ubahStatus(string $id)
+    {
+        $jenis = JenisAset::findOrFail($id);
+
+        if ($jenis->status_jenis === 'Aktif') {
+            $jenis->update([
+                'status_jenis' => 'Nonaktif'
+            ]);
+
+            $pesan = 'Jenis aset berhasil dinonaktifkan.';
+        } else {
+            $jenis->update([
+                'status_jenis' => 'Aktif'
+            ]);
+
+            $pesan = 'Jenis aset berhasil diaktifkan.';
+        }
+
+        return redirect()
+            ->route('jenis-aset.index')
+            ->with('success', $pesan);
+    }
+
+    // Membuat kode unit aset
+    private function generateKodeAset(string $namaJenis, int $nomor)
+    {
+        $prefix = $this->getPrefix($namaJenis);
+
+        return $prefix . str_pad(
+            $nomor,
+            2,
+            '0',
+            STR_PAD_LEFT
+        );
+    }
+
+    // Mengambil prefix kode dari nama jenis
+    private function getPrefix(string $namaJenis)
+    {
+        $nama = preg_replace(
+            '/[^a-zA-Z]/',
+            '',
+            trim($namaJenis)
+        );
+
+        return strtoupper(substr($nama, 0, 3));
+    }
+
 }

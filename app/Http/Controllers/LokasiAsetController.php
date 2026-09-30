@@ -8,10 +8,20 @@ use Illuminate\Support\Str;
 
 class LokasiAsetController extends Controller
 {
-    // Menampilkan daftar lokasi
-    public function index()
+    // Menampilkan daftar lokasi dan pencarian lokasi
+    public function index(Request $request)
     {
-        $lokasi = LokasiAset::all();
+        $query = LokasiAset::query();
+
+        if ($request->filled('search')) {
+            $query->where(
+                'nama_lokasi',
+                'like',
+                '%' . $request->search . '%'
+            );
+        }
+
+        $lokasi = $query->get();
 
         return view('lokasi.index', compact('lokasi'));
     }

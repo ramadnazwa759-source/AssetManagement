@@ -7,9 +7,33 @@ use App\Models\KategoriAset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-
 class SubKategoriAsetController extends Controller
 {
+    // Menampilkan daftar subkategori dan pencarian
+    public function index(Request $request)
+    {
+        $query = SubKategoriAset::with('kategori');
+
+        // Pencarian subkategori
+        if ($request->filled('search')) {
+            $query->where('nama_sub_kategori', 'like', '%' . $request->search . '%');
+        }
+
+        $subKategori = $query->get();
+
+        return view('sub-kategori.index', compact('subKategori'));
+    }
+
+    // Menampilkan detail subkategori
+    public function show($id)
+    {
+        $subKategori = SubKategoriAset::with('kategori')
+            ->findOrFail($id);
+
+        return view('sub-kategori.show', compact('subKategori'));
+    }
+
+    // Menyimpan subkategori baru
     public function store(Request $request)
     {
         $request->validate([
@@ -38,6 +62,18 @@ class SubKategoriAsetController extends Controller
             ->with('success', 'Sub kategori berhasil ditambahkan.');
     }
 
+    // Menampilkan pilihan subkategori berdasarkan kategori
+    public function berdasarkanKategori($id_kategori)
+    {
+        $subKategori = SubKategoriAset::where(
+            'id_kategori',
+            $id_kategori
+        )->get();
+
+        return response()->json($subKategori);
+    }
+
+    // Mengubah subkategori
     public function update(Request $request, $id)
     {
         $subKategori = SubKategoriAset::findOrFail($id);
@@ -56,7 +92,8 @@ class SubKategoriAsetController extends Controller
         ];
 
         if ($request->hasFile('gambar')) {
-            $data['gambar'] = $request->file('gambar')->store('sub-kategori', 'public');
+            $data['gambar'] = $request->file('gambar')
+                ->store('sub-kategori', 'public');
         }
 
         $subKategori->update($data);

@@ -132,6 +132,9 @@ class PengembalianAsetController extends Controller
 
             // Membuat catatan pengembalian
             $pengembalian = PengembalianAset::create([
+                'kode_pengembalian' =>
+                    $this->generateKodePengembalian(),
+
                 'id_peminjaman' =>
                     $peminjaman->id_peminjaman,
 
@@ -246,6 +249,26 @@ class PengembalianAsetController extends Controller
                 'Pengembalian aset berhasil disimpan.'
             );
     }
+
+    // Membuat kode pengembalian otomatis
+        private function generateKodePengembalian()
+        {
+            do {
+                $kode = 'PGM-' .
+                    now()->format('Ymd') .
+                    '-' .
+                    strtoupper(
+                        \Illuminate\Support\Str::random(4)
+                    );
+            } while (
+                PengembalianAset::where(
+                    'kode_pengembalian',
+                    $kode
+                )->exists()
+            );
+
+            return $kode;
+        }
 
 
 }

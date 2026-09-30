@@ -107,4 +107,53 @@ class AsetController extends Controller
             compact('aset', 'lokasi')
         );
     }
+
+      // Memperbarui detail aset
+    public function update(Request $request, string $id)
+    {
+        $aset = Aset::findOrFail($id);
+
+        $validated = $request->validate([
+            'id_lokasi' =>
+                'required|exists:lokasi_aset,id_lokasi',
+
+            'tanggal_beli' =>
+                'nullable|date',
+
+            'kondisi_aset' =>
+                'required|in:Baik,Rusak Ringan,Rusak Berat',
+
+            'gambar' =>
+                'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+
+            'keterangan' =>
+                'nullable|string',
+        ]);
+
+        // Mengganti gambar aset
+        if ($request->hasFile('gambar')) {
+
+            if (
+                $aset->gambar &&
+                Storage::disk('public')->exists($aset->gambar)
+            ) {
+                Storage::disk('public')->delete(
+                    $aset->gambar
+                );
+            }
+
+            $validated['gambar'] = $request
+                ->file('gambar')
+                ->store('aset', 'public');
+        }
+
+        $aset->update($validated);
+
+        return redirect()
+            ->route('aset.index')
+            ->with(
+                'success',
+                'Detail aset berhasil diperbarui.'
+            );
+    }
 }

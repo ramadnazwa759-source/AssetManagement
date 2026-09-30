@@ -156,4 +156,55 @@ class AsetController extends Controller
                 'Detail aset berhasil diperbarui.'
             );
     }
+
+     // Mengaktifkan dan menonaktifkan aset
+    public function ubahStatus(string $id)
+    {
+        $aset = Aset::with('jenis')
+            ->findOrFail($id);
+
+        // Aset yang sedang dipinjam tidak dapat dinonaktifkan
+        if ($aset->status_aset === 'Dipinjam') {
+            return redirect()
+                ->route('aset.index')
+                ->with(
+                    'error',
+                    'Aset yang sedang dipinjam tidak dapat dinonaktifkan.'
+                );
+        }
+
+        // Aset dari jenis nonaktif tidak dapat diaktifkan
+        if (
+            $aset->status_aset === 'Nonaktif' &&
+            $aset->jenis->status_jenis === 'Nonaktif'
+        ) {
+            return redirect()
+                ->route('aset.index')
+                ->with(
+                    'error',
+                    'Aktifkan jenis aset terlebih dahulu.'
+                );
+        }
+
+        if ($aset->status_aset === 'Tersedia') {
+
+            $aset->update([
+                'status_aset' => 'Nonaktif'
+            ]);
+
+            $pesan = 'Aset berhasil dinonaktifkan.';
+        } else {
+
+            $aset->update([
+                'status_aset' => 'Tersedia'
+            ]);
+
+            $pesan = 'Aset berhasil diaktifkan.';
+        }
+
+        return redirect()
+            ->route('aset.index')
+            ->with('success', $pesan);
+    }
+}
 }

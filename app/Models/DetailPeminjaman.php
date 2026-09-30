@@ -15,11 +15,12 @@ class DetailPeminjaman extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'protected $fillable = [
         'id_detail_peminjaman',
         'id_peminjaman',
-        'id_aset',
+        'id_jenis',
+        'jumlah_pinjam',
     ];
-
     public function peminjaman()
     {
         return $this->belongsTo(
@@ -29,12 +30,12 @@ class DetailPeminjaman extends Model
         );
     }
 
-    public function aset()
+    public function jenis()
     {
         return $this->belongsTo(
-            Aset::class,
-            'id_aset',
-            'kode_aset'
+            JenisAset::class,
+            'id_jenis',
+            'id_jenis'
         );
     }
 }

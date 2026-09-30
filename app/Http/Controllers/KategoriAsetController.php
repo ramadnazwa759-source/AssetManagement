@@ -9,14 +9,22 @@ use Illuminate\Support\Str;
 
 class KategoriAsetController extends Controller
 {
-    // Menampilkan semua kategori
-   public function index()
-{
-    $kategori = KategoriAset::all();
-    $subKategori = SubKategoriAset::all();
+    // Menampilkan semua kategori dan pencarian kategori
+    public function index(Request $request)
+    {
+        $query = KategoriAset::query();
 
-    return view('kategori.index', compact('kategori', 'subKategori'));
-}
+        // Pencarian kategori berdasarkan nama kategori
+        if ($request->filled('search')) {
+            $query->where('nama_kategori', 'like', '%' . $request->search . '%');
+        }
+
+        $kategori = $query->get();
+        $subKategori = SubKategoriAset::all();
+
+        return view('kategori.index', compact('kategori', 'subKategori'));
+    }
+
     // Menampilkan form tambah kategori
     public function create()
     {
@@ -40,6 +48,14 @@ class KategoriAsetController extends Controller
         return redirect()
             ->route('kategori.index')
             ->with('success', 'Kategori berhasil ditambahkan.');
+    }
+
+    // Menampilkan detail kategori
+    public function show($id)
+    {
+        $kategori = KategoriAset::findOrFail($id);
+
+        return view('kategori.show', compact('kategori'));
     }
 
     // Menampilkan form edit kategori

@@ -13,7 +13,6 @@ Route::get('/login', [UserController::class, 'login'])->name('login');
 Route::post('/login', [UserController::class, 'authenticate'])->name('login.process');
 Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 
-// Halaman Kategori tanpa login
 Route::get('/kategori', [KategoriAsetController::class, 'index'])
     ->name('kategori.index');
 
@@ -29,8 +28,8 @@ Route::get('/kategori/{kategori}/edit', [KategoriAsetController::class, 'edit'])
 Route::put('/kategori/{kategori}', [KategoriAsetController::class, 'update'])
     ->name('kategori.update');
 
-Route::delete('/kategori/{kategori}', [KategoriAsetController::class, 'destroy'])
-    ->name('kategori.destroy');
+Route::get('/kategori/{kategori}', [KategoriAsetController::class, 'show'])
+    ->name('kategori.show');
 
 Route::post('/sub-kategori', [SubKategoriAsetController::class, 'store'])
     ->name('sub-kategori.store');

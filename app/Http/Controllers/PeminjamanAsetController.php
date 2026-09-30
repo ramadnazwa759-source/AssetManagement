@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 class PeminjamanAsetController extends Controller
 {
-    // Menampilkan daftar peminjaman
+       // Menampilkan daftar peminjaman
     public function index(Request $request)
     {
         $query = PeminjamanAset::with([
@@ -50,4 +50,21 @@ class PeminjamanAsetController extends Controller
             });
         }
 
+        // Memfilter status peminjaman
+        if ($request->filled('status_peminjaman')) {
+            $query->where(
+                'status_peminjaman',
+                $request->status_peminjaman
+            );
+        }
+
+        $peminjaman = $query
+            ->latest()
+            ->get();
+
+        return view(
+            'asset-management.peminjaman.index',
+            compact('peminjaman')
+        );
+    }
 }

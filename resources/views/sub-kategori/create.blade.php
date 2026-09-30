@@ -9,7 +9,10 @@
 
         <div class="header-left">
 
-            <a href="{{ route('kategori.index') }}" class="back-button">
+            <a
+                href="{{ route('kategori.sub-kategori.index', $kategori->id_kategori) }}"
+                class="back-button"
+            >
                 ←
             </a>
 
@@ -19,12 +22,11 @@
                     MASTER DATA
                 </span>
 
-                <h1>
-                    Ubah Kategori Aset
-                </h1>
+                <h1>Tambah Sub Kategori</h1>
 
                 <p>
-                    Perbarui informasi kategori aset yang sudah terdaftar.
+                    Tambahkan sub kategori untuk
+                    <strong>{{ $kategori->nama_kategori }}</strong>.
                 </p>
 
             </div>
@@ -38,50 +40,73 @@
     <div class="form-card">
 
         <form
-            action="{{ route('kategori.update', $kategori->id_kategori) }}"
+            action="{{ route('kategori.sub-kategori.store', $kategori->id_kategori) }}"
             method="POST"
+            enctype="multipart/form-data"
         >
 
             @csrf
-            @method('PUT')
+
+            {{-- PENTING: ID KATEGORI --}}
+            <input
+                type="hidden"
+                name="id_kategori"
+                value="{{ $kategori->id_kategori }}"
+            >
 
 
-            {{-- ID KATEGORI --}}
+            {{-- ID SUB KATEGORI --}}
             <div class="form-group">
 
-                <label for="id_kategori">
-                    ID Kategori
+                <label for="id_sub_kategori">
+                    ID Sub Kategori
                 </label>
 
                 <input
                     type="text"
-                    id="id_kategori"
-                    name="id_kategori"
-                    value="{{ $kategori->id_kategori }}"
+                    id="id_sub_kategori"
+                    value="{{ $idSubKategoriBaru }}"
                     readonly
                 >
 
             </div>
 
 
-            {{-- NAMA KATEGORI --}}
+            {{-- KATEGORI --}}
             <div class="form-group">
 
-                <label for="nama_kategori">
-                    Nama Kategori
+                <label for="kategori">
+                    Kategori
+                </label>
+
+                <input
+                    type="text"
+                    id="kategori"
+                    value="{{ $kategori->nama_kategori }}"
+                    readonly
+                >
+
+            </div>
+
+
+            {{-- NAMA SUB KATEGORI --}}
+            <div class="form-group">
+
+                <label for="nama_sub_kategori">
+                    Nama Sub Kategori
                     <span>*</span>
                 </label>
 
                 <input
                     type="text"
-                    id="nama_kategori"
-                    name="nama_kategori"
-                    value="{{ old('nama_kategori', $kategori->nama_kategori) }}"
-                    placeholder="Masukkan nama kategori"
+                    id="nama_sub_kategori"
+                    name="nama_sub_kategori"
+                    value="{{ old('nama_sub_kategori') }}"
+                    placeholder="Contoh: Tangga"
                     required
                 >
 
-                @error('nama_kategori')
+                @error('nama_sub_kategori')
                     <small class="input-error">
                         {{ $message }}
                     </small>
@@ -90,21 +115,48 @@
             </div>
 
 
+            {{-- GAMBAR --}}
+            <div class="form-group">
+
+                <label for="gambar">
+                    Gambar
+                </label>
+
+                <input
+                    type="file"
+                    id="gambar"
+                    name="gambar"
+                    accept=".jpg,.jpeg,.png,.webp"
+                >
+
+                @error('gambar')
+                    <small class="input-error">
+                        {{ $message }}
+                    </small>
+                @enderror
+
+                <small class="form-help">
+                    Format JPG, JPEG, PNG, atau WEBP. Maksimal 2 MB.
+                </small>
+
+            </div>
+
+
             {{-- DESKRIPSI --}}
             <div class="form-group">
 
-                <label for="Deskripsi">
+                <label for="deskripsi">
                     Deskripsi
                 </label>
 
                 <textarea
-                    id="Deskripsi"
-                    name="Deskripsi"
+                    id="deskripsi"
+                    name="deskripsi"
                     rows="5"
-                    placeholder="Masukkan deskripsi kategori..."
-                >{{ old('Deskripsi', $kategori->Deskripsi) }}</textarea>
+                    placeholder="Masukkan deskripsi sub kategori"
+                >{{ old('deskripsi') }}</textarea>
 
-                @error('Deskripsi')
+                @error('deskripsi')
                     <small class="input-error">
                         {{ $message }}
                     </small>
@@ -118,8 +170,8 @@
 
                 <strong>Catatan:</strong>
 
-                Pastikan perubahan data kategori sudah sesuai
-                sebelum menyimpan.
+                Sub kategori akan otomatis terhubung dengan kategori
+                <strong>{{ $kategori->nama_kategori }}</strong>.
 
             </div>
 
@@ -128,7 +180,7 @@
             <div class="form-actions">
 
                 <a
-                    href="{{ route('kategori.index') }}"
+                    href="{{ route('kategori.sub-kategori.index', $kategori->id_kategori) }}"
                     class="cancel-button"
                 >
                     Batal
@@ -138,7 +190,7 @@
                     type="submit"
                     class="save-button"
                 >
-                    Simpan Perubahan
+                    Simpan Sub Kategori
                 </button>
 
             </div>
@@ -166,10 +218,6 @@
 
     margin: 0 auto;
 
-    /*
-     * Jarak atas dibuat lebih besar
-     * supaya tidak tertutup navbar
-     */
     padding: 125px 30px 60px;
 
     box-sizing: border-box;
@@ -366,8 +414,19 @@
 
 
 /* =====================================================
-   ERROR
+   HELP & ERROR
 ===================================================== */
+
+.form-help {
+
+    display: block;
+
+    margin-top: 6px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
 
 .input-error {
 

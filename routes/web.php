@@ -12,119 +12,93 @@ use App\Http\Controllers\JenisAsetController;
 // LOGIN
 // =====================================================
 
-// Menampilkan halaman login
-Route::get('/', [UserController::class, 'login'])
+Route::get('/login', [UserController::class, 'login'])
     ->name('login');
 
-// Memproses login
 Route::post('/login', [UserController::class, 'authenticate'])
     ->name('login.process');
 
-// Logout
 Route::post('/logout', [UserController::class, 'logout'])
     ->name('logout');
 
 
-
-// =========================
-// LOGOUT
-// =========================
-
-Route::post('/logout', [UserController::class, 'logout'])->name('logout');
-
-
-
-// =========================
-
+// =====================================================
+// DASHBOARD
 // =====================================================
 
-// HALAMAN YANG SUDAH LOGIN
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');
+
+
+// =====================================================
+// KATEGORI ASET
 // =====================================================
 
-Route::middleware('auth')->group(function () {
-
-
-    // Kategori Aset
-    Route::resource('/kategori', KategoriAsetController::class);
-
-});
-
-    
-    // DASHBOARD
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
-
-
-
-    // KATEGORI ASET
-    Route::get('/kategori', [KategoriAsetController::class, 'index'])
-        ->name('kategori.index');
-
-    Route::get('/kategori/create', [KategoriAsetController::class, 'create'])
-        ->name('kategori.create');
-
-    Route::post('/kategori', [KategoriAsetController::class, 'store'])
-        ->name('kategori.store');
-
-    Route::get('/kategori/{kategori}/edit', [KategoriAsetController::class, 'edit'])
-        ->name('kategori.edit');
-
-    Route::put('/kategori/{kategori}', [KategoriAsetController::class, 'update'])
-        ->name('kategori.update');
-
-    Route::delete('/kategori/{kategori}', [KategoriAsetController::class, 'destroy'])
-        ->name('kategori.destroy');
-
-
-    
-    // SUB KATEGORI ASET
-    Route::post('/sub-kategori', [SubKategoriAsetController::class, 'store'])
-        ->name('sub-kategori.store');
-
-    Route::put('/sub-kategori/{id}', [SubKategoriAsetController::class, 'update'])
-        ->name('sub-kategori.update');
-
-
-Route::get('/jenis-aset/tambah', function () {
-    return view('jenis-aset.create');
-});
-
-// Halaman Kategori tanpa login
 Route::get('/kategori', [KategoriAsetController::class, 'index'])
     ->name('kategori.index');
 
-    Route::delete('/sub-kategori/{id}', [SubKategoriAsetController::class, 'destroy'])
-        ->name('sub-kategori.destroy');
+Route::get('/kategori/create', [KategoriAsetController::class, 'create'])
+    ->name('kategori.create');
 
+Route::post('/kategori', [KategoriAsetController::class, 'store'])
+    ->name('kategori.store');
 
+// Halaman update kategori
+Route::get('/kategori/{id}/update', [KategoriAsetController::class, 'edit'])
+    ->name('kategori.update.form');
 
-    
-    // JENIS ASET
-    Route::get('/jenis-aset', [JenisAsetController::class, 'index'])
-        ->name('jenis-aset.index');
+// Proses update kategori
+Route::put('/kategori/{id}', [KategoriAsetController::class, 'update'])
+    ->name('kategori.update');
 
-    Route::get('/jenis-aset/tambah', [JenisAsetController::class, 'create'])
-        ->name('jenis-aset.create');
+// Hapus kategori
+Route::delete('/kategori/{id}', [KategoriAsetController::class, 'destroy'])
+    ->name('kategori.destroy');
 
-    Route::post('/jenis-aset', [JenisAsetController::class, 'store'])
-        ->name('jenis-aset.store');
+// =====================================================
+// SUB KATEGORI ASET
+// =====================================================
 
-    Route::get('/jenis-aset/{id}/edit', [JenisAsetController::class, 'edit'])
-        ->name('jenis-aset.edit');
+/// SUB KATEGORI
+Route::get('/kategori/{id_kategori}/sub-kategori', [SubKategoriAsetController::class, 'index'])
+    ->name('kategori.sub-kategori.index');
 
-    Route::put('/jenis-aset/{id}', [JenisAsetController::class, 'update'])
-        ->name('jenis-aset.update');
+Route::get('/kategori/{id_kategori}/sub-kategori/create', [SubKategoriAsetController::class, 'create'])
+    ->name('kategori.sub-kategori.create');
 
-    Route::patch('/jenis-aset/{id}/status', [JenisAsetController::class, 'ubahStatus'])
-        ->name('jenis-aset.status');
+Route::post('/kategori/{id_kategori}/sub-kategori', [SubKategoriAsetController::class, 'store'])
+    ->name('kategori.sub-kategori.store');
 
+Route::get('/kategori/{id_kategori}/sub-kategori/{id}/update', [SubKategoriAsetController::class, 'edit'])
+    ->name('kategori.sub-kategori.edit');
 
-Route::delete('/sub-kategori/{id}', [SubKategoriAsetController::class, 'destroy'])
-    ->name('sub-kategori.destroy');
+Route::put('/kategori/{id_kategori}/sub-kategori/{id}', [SubKategoriAsetController::class, 'update'])
+    ->name('kategori.sub-kategori.update');
 
+Route::delete('/kategori/{id_kategori}/sub-kategori/{id}', [SubKategoriAsetController::class, 'destroy'])
+    ->name('kategori.sub-kategori.destroy');
 
-    Route::get('/jenis-aset/{id}', [JenisAsetController::class, 'show'])
-        ->name('jenis-aset.show');
+// =====================================================
+// JENIS ASET
+// =====================================================
 
-});
+Route::get('/jenis-aset', [JenisAsetController::class, 'index'])
+    ->name('jenis-aset.index');
 
+Route::get('/jenis-aset/tambah', [JenisAsetController::class, 'create'])
+    ->name('jenis-aset.create');
+
+Route::post('/jenis-aset', [JenisAsetController::class, 'store'])
+    ->name('jenis-aset.store');
+
+Route::get('/jenis-aset/{id}/edit', [JenisAsetController::class, 'edit'])
+    ->name('jenis-aset.edit');
+
+Route::put('/jenis-aset/{id}', [JenisAsetController::class, 'update'])
+    ->name('jenis-aset.update');
+
+Route::patch('/jenis-aset/{id}/status', [JenisAsetController::class, 'ubahStatus'])
+    ->name('jenis-aset.status');
+
+Route::get('/jenis-aset/{id}', [JenisAsetController::class, 'show'])
+    ->name('jenis-aset.show');

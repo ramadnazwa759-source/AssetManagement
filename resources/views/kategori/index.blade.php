@@ -1,795 +1,702 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.app')
 
-    <title>Kategori Aset - Kalisawah</title>
+@section('content')
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
+@if (session('success'))
+    <div class="alert-success">
+        ✓ {{ session('success') }}
+    </div>
+@endif
 
-        body {
-            background: #f5f7fb;
-            color: #1e293b;
-        }
+<section class="page-section">
 
-        /* SIDEBAR */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 240px;
-            height: 100vh;
-            background: #0b4f9c;
-            color: white;
-            padding: 25px 18px;
-        }
+    {{-- HEADER --}}
+    <div class="page-top">
 
-        .logo {
-            text-align: center;
-            margin-bottom: 35px;
-        }
+        <div class="page-heading">
 
-        .logo h2 {
-            font-size: 22px;
-        }
-
-        .logo span {
-            color: #ffd43b;
-        }
-
-        .menu-title {
-            font-size: 12px;
-            color: #cbd5e1;
-            margin: 20px 10px 10px;
-            text-transform: uppercase;
-        }
-
-        .menu a {
-            display: block;
-            text-decoration: none;
-            color: white;
-            padding: 12px 14px;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-
-        .menu a:hover,
-        .menu a.active {
-            background: #ffd43b;
-            color: #0b4f9c;
-            font-weight: bold;
-        }
-
-        /* MAIN */
-        .main {
-            margin-left: 240px;
-            min-height: 100vh;
-        }
-
-        /* TOPBAR */
-        .topbar {
-            height: 70px;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 35px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .topbar h3 {
-            color: #0b4f9c;
-        }
-
-        .admin {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .admin-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #ffd43b;
-            color: #0b4f9c;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        /* CONTENT */
-        .content {
-            padding: 30px 35px;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .page-header h1 {
-            color: #0b4f9c;
-            font-size: 25px;
-        }
-
-        .page-header p {
-            color: #64748b;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        /* BUTTON */
-        .btn {
-            border: none;
-            padding: 11px 17px;
-            border-radius: 7px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-yellow {
-            background: #ffd43b;
-            color: #0b4f9c;
-        }
-
-        .btn-blue {
-            background: #0b4f9c;
-            color: white;
-        }
-
-        .btn-red {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .btn-cancel {
-            background: #e2e8f0;
-            color: #475569;
-        }
-
-        /* TABLE */
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #0b4f9c;
-            color: white;
-            text-align: left;
-            padding: 15px;
-            font-size: 13px;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 14px;
-            vertical-align: middle;
-        }
-
-        tr:hover {
-            background: #f8fafc;
-        }
-
-        .id {
-            color: #64748b;
-            font-weight: bold;
-        }
-
-        .category-name {
-            font-weight: bold;
-            color: #0b4f9c;
-        }
-
-        .description {
-            color: #64748b;
-        }
-
-        .actions {
-            display: flex;
-            gap: 7px;
-        }
-
-        .action-btn {
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .detail-btn {
-            background: #e0efff;
-            color: #0b4f9c;
-        }
-
-        .edit-btn {
-            background: #fff3bf;
-            color: #856404;
-        }
-
-        .delete-btn {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        /* SUB CATEGORY */
-        .subcategory-row {
-            display: none;
-            background: #f8fafc;
-        }
-
-        .subcategory-content {
-            padding: 20px 30px 25px 75px;
-        }
-
-        .subcategory-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .subcategory-header h4 {
-            color: #0b4f9c;
-            font-size: 15px;
-        }
-
-        .subcategory-table {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .subcategory-table th {
-            background: #eaf3ff;
-            color: #0b4f9c;
-        }
-
-        .subcategory-table td {
-            padding: 11px 13px;
-            font-size: 13px;
-        }
-
-        .small-btn {
-            border: none;
-            padding: 7px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .add-sub-btn {
-            background: #ffd43b;
-            color: #0b4f9c;
-        }
-
-        /* ALERT */
-        .alert {
-            padding: 12px 15px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .alert-success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        /* EMPTY */
-        .empty {
-            text-align: center;
-            color: #64748b;
-            padding: 30px;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 900px) {
-            .sidebar {
-                width: 200px;
-            }
-
-            .main {
-                margin-left: 200px;
-            }
-
-            .content {
-                padding: 25px 20px;
-            }
-
-            .subcategory-content {
-                padding-left: 30px;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .sidebar {
-                display: none;
-            }
-
-            .main {
-                margin-left: 0;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-
-            table {
-                min-width: 750px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-
-        <div class="logo">
-            <h2>KALI<span>SAWAH</span></h2>
-        </div>
-
-        <div class="menu-title">Menu</div>
-
-        <div class="menu">
-            <a href="{{ route('dashboard') }}">Dashboard</a>
-
-            <a href="{{ route('kategori.index') }}" class="active">
-                Kategori Aset
+            <a href="{{ route('dashboard') }}" class="back-link">
+                ← Kembali ke Beranda
             </a>
 
-            <a href="#">Sub Kategori</a>
-            <a href="#">Jenis Aset</a>
-            <a href="#">Lokasi Aset</a>
-            <a href="#">Data Aset</a>
-            <a href="#">Peminjaman Aset</a>
-            <a href="#">Pengembalian Aset</a>
+            <h1>Kategori Aset</h1>
+
+            <p>
+                Kelola kategori aset yang digunakan dalam sistem Asset Management.
+            </p>
+
         </div>
 
-    </aside>
+        <div class="page-action">
+
+            <a href="{{ route('kategori.create') }}" class="add-button">
+                <span>+</span>
+                Tambah Kategori Aset
+            </a>
+
+        </div>
+
+    </div>
 
 
-    <!-- MAIN -->
-    <main class="main">
+    {{-- INFORMASI DATA --}}
+    <div class="data-info">
 
-        <!-- TOPBAR -->
-        <header class="topbar">
+        <div class="info-left">
+            <strong>{{ $kategori->count() }}</strong>
+            <span>Kategori aset terdaftar</span>
+        </div>
 
-            <h3>Asset Management</h3>
+        <div class="info-right">
+            Data master kategori aset
+        </div>
 
-            <div class="admin">
-                <div class="admin-icon">A</div>
-                <span>Admin</span>
+    </div>
+
+
+    {{-- TABLE --}}
+    <div class="table-card">
+
+        <div class="table-header">
+
+            <div>
+                <h3>Daftar Kategori Aset</h3>
+
+                <p>
+                    Daftar kategori aset yang tersimpan dalam sistem.
+                </p>
             </div>
 
-        </header>
+        </div>
 
 
-        <!-- CONTENT -->
-        <section class="content">
+        <div class="table-wrapper">
 
-            <!-- SUCCESS MESSAGE -->
-            @if(session('success'))
-                <div class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
+            <table>
 
+                <thead>
+                    <tr>
+                        <th>ID Kategori</th>
+                        <th>Nama Kategori</th>
+                        <th>Deskripsi</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
 
-            <!-- PAGE HEADER -->
-            <div class="page-header">
+                <tbody>
 
-                <div>
-                    <h1>Kategori Aset</h1>
-                    <p>Kelola kategori dan sub kategori aset Kalisawah.</p>
-                </div>
+                    @forelse ($kategori as $item)
 
-                <a
-                    href="{{ route('kategori.create') }}"
-                    class="btn btn-yellow">
-                    + Tambah Kategori
-                </a>
-
-            </div>
-
-
-            <!-- CATEGORY TABLE -->
-            <div class="table-container">
-
-                <table>
-
-                    <thead>
                         <tr>
-                            <th width="150">ID Kategori</th>
-                            <th width="220">Nama Kategori</th>
-                            <th>Deskripsi</th>
-                            <th width="170">Aksi</th>
-                        </tr>
-                    </thead>
 
-                    <tbody>
-
-                        @forelse($kategori as $item)
-
-                            <!-- KATEGORI -->
-                            <tr>
-
-                                <td class="id">
+                            {{-- ID KATEGORI --}}
+                            <td>
+                                <span class="kode-badge">
                                     {{ $item->id_kategori }}
-                                </td>
+                                </span>
+                            </td>
 
-                                <td class="category-name">
+
+                            {{-- NAMA KATEGORI --}}
+                            <td>
+                                <strong class="kategori-name">
                                     {{ $item->nama_kategori }}
-                                </td>
+                                </strong>
+                            </td>
 
-                                <td class="description">
-                                    {{ $item->Deskripsi ?? '-' }}
-                                </td>
 
-                                <td>
+                            {{-- DESKRIPSI --}}
+                            <td>
+                                <span class="deskripsi-text">
+                                    {{ $item->Deskripsi ?: '-' }}
+                                </span>
+                            </td>
 
-                                    <div class="actions">
 
-                                        <!-- LIHAT SUB KATEGORI -->
+                            {{-- AKSI --}}
+                            <td>
+
+                                <div class="action-buttons">
+
+                                    {{-- SUB KATEGORI --}}
+                                    <a
+                                        href="{{ route('kategori.sub-kategori.index', $item->id_kategori) }}"
+                                        class="sub-button"
+                                        title="Kelola Sub Kategori"
+                                    >
+                                        +
+                                    </a>
+
+
+                                    {{-- UPDATE / EDIT KATEGORI --}}
+                                    <a
+                                        href="{{ route('kategori.update.form', $item->id_kategori) }}"
+                                        class="edit-button"
+                                        title="Ubah Kategori"
+                                    >
+                                        ✎
+                                    </a>
+
+
+                                    {{-- HAPUS KATEGORI --}}
+                                    <form
+                                        action="{{ route('kategori.destroy', $item->id_kategori) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Yakin ingin menghapus kategori ini?')"
+                                    >
+
+                                        @csrf
+
+                                        @method('DELETE')
+
                                         <button
-                                            type="button"
-                                            class="action-btn detail-btn"
-                                            onclick="toggleSubcategory('sub-{{ $item->id_kategori }}', this)"
-                                            title="Lihat Sub Kategori">
-                                            ▼
+                                            type="submit"
+                                            class="delete-button"
+                                            title="Hapus Kategori"
+                                        >
+                                            🗑
                                         </button>
 
-                                        <!-- EDIT -->
-                                        <a
-                                            href="{{ route('kategori.edit', $item->id_kategori) }}"
-                                            class="action-btn edit-btn"
-                                            title="Ubah"
-                                            style="display:flex;align-items:center;justify-content:center;text-decoration:none;">
-                                            ✏
-                                        </a>
+                                    </form>
 
-                                        <!-- HAPUS -->
-                                        <form
-                                            action="{{ route('kategori.destroy', $item->id_kategori) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('Apakah kamu yakin ingin menghapus kategori ini?')">
+                                </div>
 
-                                            @csrf
-                                            @method('DELETE')
+                            </td>
 
-                                            <button
-                                                type="submit"
-                                                class="action-btn delete-btn"
-                                                title="Hapus">
-                                                🗑
-                                            </button>
+                        </tr>
 
-                                        </form>
+                    @empty
 
-                                    </div>
+                        <tr>
 
-                                </td>
-
-                            </tr>
-
-
-                            <!-- SUB KATEGORI -->
-                            <tr
-                                id="sub-{{ $item->id_kategori }}"
-                                class="subcategory-row">
+                            <td colspan="4" class="empty-data">
+                                Belum ada data kategori aset.
+                            </td>
 
-                                <td colspan="4">
+                        </tr>
 
-                                    <div class="subcategory-content">
+                    @endforelse
 
-                                        <div class="subcategory-header">
+                </tbody>
 
-                                            <h4>
-                                                Sub Kategori dari
-                                                {{ $item->nama_kategori }}
-                                            </h4>
+            </table>
 
-                                            <form
-                                                action="{{ route('sub-kategori.store') }}"
-                                                method="POST"
-                                                enctype="multipart/form-data">
+        </div>
 
-                                                @csrf
+    </div>
 
-                                                <input
-                                                    type="hidden"
-                                                    name="id_kategori"
-                                                    value="{{ $item->id_kategori }}">
-
-                                                <button
-                                                    type="button"
-                                                    class="small-btn add-sub-btn"
-                                                    onclick="openSubCategoryForm('sub-form-{{ $item->id_kategori }}')">
-                                                    + Tambah Sub Kategori
-                                                </button>
+</section>
 
-                                            </form>
+@endsection
 
-                                        </div>
 
+@push('styles')
+<style>
 
-                                        <!-- FORM TAMBAH SUBKATEGORI -->
-                                        <div
-                                            id="sub-form-{{ $item->id_kategori }}"
-                                            style="display:none; background:white; padding:20px; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:15px;">
+/* =====================================================
+   PAGE
+===================================================== */
 
-                                            <form
-                                                action="{{ route('sub-kategori.store') }}"
-                                                method="POST"
-                                                enctype="multipart/form-data">
+.page-section {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
 
-                                                @csrf
-
-                                                <input
-                                                    type="hidden"
-                                                    name="id_kategori"
-                                                    value="{{ $item->id_kategori }}">
+    padding: 85px 44px 45px;
 
-                                                <div style="margin-bottom:12px;">
-                                                    <label>Nama Sub Kategori</label>
+    box-sizing: border-box;
+}
 
-                                                    <input
-                                                        type="text"
-                                                        name="nama_sub_kategori"
-                                                        required
-                                                        style="width:100%;padding:10px;margin-top:5px;">
-                                                </div>
 
-                                                <div style="margin-bottom:12px;">
-                                                    <label>Gambar</label>
-
-                                                    <input
-                                                        type="file"
-                                                        name="gambar"
-                                                        accept="image/*"
-                                                        style="width:100%;padding:8px;margin-top:5px;">
-                                                </div>
-
-                                                <div style="margin-bottom:12px;">
-                                                    <label>Deskripsi</label>
-
-                                                    <textarea
-                                                        name="deskripsi"
-                                                        rows="3"
-                                                        style="width:100%;padding:10px;margin-top:5px;"></textarea>
-                                                </div>
-
-                                                <button
-                                                    type="submit"
-                                                    class="btn btn-blue">
-                                                    Simpan
-                                                </button>
+/* =====================================================
+   HEADER
+===================================================== */
 
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-cancel"
-                                                    onclick="openSubCategoryForm('sub-form-{{ $item->id_kategori }}')">
-                                                    Batal
-                                                </button>
+.page-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
 
-                                            </form>
+    gap: 30px;
 
-                                        </div>
+    margin-bottom: 28px;
+}
 
+.page-heading {
+    flex: 1;
+    min-width: 0;
+}
 
-                                        <!-- TABLE SUB KATEGORI -->
-                                        <div class="subcategory-table">
+.back-link {
+    display: inline-block;
 
-                                            <table>
+    margin-bottom: 14px;
 
-                                                <thead>
-                                                    <tr>
-                                                        <th>ID Sub Kategori</th>
-                                                        <th>Nama Sub Kategori</th>
-                                                        <th>Gambar</th>
-                                                        <th>Deskripsi</th>
-                                                        <th>Aksi</th>
-                                                    </tr>
-                                                </thead>
+    color: #64748b;
 
-                                                <tbody>
+    text-decoration: none;
 
-                                                    @php
-                                                        $subItems = $subKategori->where(
-                                                            'id_kategori',
-                                                            $item->id_kategori
-                                                        );
-                                                    @endphp
+    font-size: 13px;
+    font-weight: 500;
 
-                                                    @forelse($subItems as $sub)
+    transition: 0.2s;
+}
 
-                                                        <tr>
+.back-link:hover {
+    color: #2563eb;
+}
 
-                                                            <td>
-                                                                {{ $sub->id_sub_kategori }}
-                                                            </td>
+.page-heading h1 {
+    margin: 0;
 
-                                                            <td>
-                                                                {{ $sub->nama_sub_kategori }}
-                                                            </td>
+    color: #0f172a;
 
-                                                            <td>
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 700;
+}
 
-                                                                @if($sub->gambar)
-                                                                    <img
-                                                                        src="{{ asset('storage/' . $sub->gambar) }}"
-                                                                        width="60"
-                                                                        height="45"
-                                                                        style="object-fit:cover;border-radius:5px;">
-                                                                @else
-                                                                    -
-                                                                @endif
+.page-heading p {
+    margin: 8px 0 0;
 
-                                                            </td>
+    color: #64748b;
 
-                                                            <td>
-                                                                {{ $sub->deskripsi ?? '-' }}
-                                                            </td>
+    font-size: 14px;
+    line-height: 1.5;
+}
 
-                                                            <td>
 
-                                                                <div class="actions">
+/* =====================================================
+   BUTTON TAMBAH
+===================================================== */
 
-                                                                    <!-- EDIT SUB KATEGORI -->
-                                                                    <button
-                                                                        type="button"
-                                                                        class="action-btn edit-btn"
-                                                                        onclick="editSubCategory('{{ $sub->id_sub_kategori }}')">
-                                                                        ✏
-                                                                    </button>
+.page-action {
+    flex-shrink: 0;
+}
 
-                                                                    <!-- HAPUS SUB KATEGORI -->
-                                                                    <form
-                                                                        action="{{ route('sub-kategori.destroy', $sub->id_sub_kategori) }}"
-                                                                        method="POST"
-                                                                        onsubmit="return confirm('Hapus sub kategori ini?')">
+.add-button {
+    display: inline-flex;
 
-                                                                        @csrf
-                                                                        @method('DELETE')
+    align-items: center;
+    justify-content: center;
 
-                                                                        <button
-                                                                            type="submit"
-                                                                            class="action-btn delete-btn">
-                                                                            🗑
-                                                                        </button>
+    gap: 8px;
 
-                                                                    </form>
+    padding: 12px 18px;
 
-                                                                </div>
+    background: #2563eb;
+    color: #ffffff;
 
-                                                            </td>
+    text-decoration: none;
 
-                                                        </tr>
+    border-radius: 8px;
 
-                                                    @empty
+    font-size: 14px;
+    font-weight: 600;
 
-                                                        <tr>
-                                                            <td colspan="5" class="empty">
-                                                                Belum ada sub kategori.
-                                                            </td>
-                                                        </tr>
+    transition: 0.2s;
+}
 
-                                                    @endforelse
+.add-button:hover {
+    background: #1d4ed8;
+}
 
-                                                </tbody>
+.add-button span {
+    font-size: 20px;
+    line-height: 1;
+}
 
-                                            </table>
 
-                                        </div>
+/* =====================================================
+   INFORMASI DATA
+===================================================== */
 
-                                    </div>
+.data-info {
+    display: flex;
 
-                                </td>
+    justify-content: space-between;
+    align-items: center;
 
-                            </tr>
+    padding: 17px 22px;
 
-                        @empty
+    margin-bottom: 20px;
 
-                            <tr>
-                                <td colspan="4" class="empty">
-                                    Belum ada kategori aset.
-                                </td>
-                            </tr>
+    background: #ffffff;
 
-                        @endforelse
+    border: 1px solid #e2e8f0;
 
-                    </tbody>
+    border-radius: 10px;
+}
 
-                </table>
+.info-left {
+    display: flex;
 
-            </div>
+    align-items: center;
 
-        </section>
+    gap: 10px;
+}
 
-    </main>
+.info-left strong {
+    color: #2563eb;
 
+    font-size: 22px;
+    font-weight: 700;
+}
 
-    <script>
+.info-left span,
+.info-right {
+    color: #64748b;
 
-        function toggleSubcategory(id, button) {
+    font-size: 13px;
+}
 
-            const row = document.getElementById(id);
 
-            if (row.style.display === "table-row") {
+/* =====================================================
+   TABLE CARD
+===================================================== */
 
-                row.style.display = "none";
-                button.innerHTML = "▼";
+.table-card {
+    background: #ffffff;
 
-            } else {
+    border: 1px solid #e2e8f0;
 
-                row.style.display = "table-row";
-                button.innerHTML = "▲";
+    border-radius: 10px;
 
-            }
+    overflow: hidden;
+}
 
-        }
 
+/* =====================================================
+   TABLE HEADER
+===================================================== */
 
-        function openSubCategoryForm(id) {
+.table-header {
+    padding: 20px 22px;
 
-            const form = document.getElementById(id);
+    border-bottom: 1px solid #e2e8f0;
+}
 
-            if (form.style.display === "none") {
-                form.style.display = "block";
-            } else {
-                form.style.display = "none";
-            }
+.table-header h3 {
+    margin: 0;
 
-        }
+    color: #0f172a;
 
+    font-size: 16px;
+    font-weight: 600;
+}
 
-        function editSubCategory(id) {
+.table-header p {
+    margin: 5px 0 0;
 
-            alert(
-                'Edit sub kategori dengan ID: ' + id +
-                '\n\nForm edit sub kategori belum tersedia pada controller.'
-            );
+    color: #64748b;
 
-        }
+    font-size: 13px;
+}
 
-    </script>
 
-</body>
-</html>
+/* =====================================================
+   TABLE
+===================================================== */
+
+.table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    table-layout: auto;
+}
+
+thead {
+    background: #11569c;
+}
+
+th {
+    padding: 14px 18px;
+
+    color: #ffffff;
+
+    text-align: left;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+td {
+    padding: 16px 18px;
+
+    border-top: 1px solid #f1f5f9;
+
+    color: #475569;
+
+    font-size: 14px;
+
+    vertical-align: middle;
+}
+
+tbody tr {
+    transition: background 0.15s;
+}
+
+tbody tr:hover {
+    background: #f8fafc;
+}
+
+
+/* =====================================================
+   ID KATEGORI
+===================================================== */
+
+.kode-badge {
+    color: #64748b;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   NAMA KATEGORI
+===================================================== */
+
+.kategori-name {
+    color: #07549f;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   DESKRIPSI
+===================================================== */
+
+.deskripsi-text {
+    color: #64748b;
+
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   AKSI
+===================================================== */
+
+.action-buttons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+/* =====================================================
+   TOMBOL SUB KATEGORI (+)
+===================================================== */
+
+.sub-button {
+    width: 38px;
+    height: 38px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #dbeafe;
+    color: #07549f;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    font-size: 23px;
+    font-weight: 500;
+
+    line-height: 1;
+
+    transition: 0.2s;
+}
+
+.sub-button:hover {
+    background: #bfdbfe;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   TOMBOL EDIT
+===================================================== */
+
+.edit-button {
+    width: 38px;
+    height: 38px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #fff3c4;
+    color: #9a6b00;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    font-size: 17px;
+
+    transition: 0.2s;
+}
+
+.edit-button:hover {
+    background: #fde68a;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   TOMBOL HAPUS
+===================================================== */
+
+.delete-button {
+    width: 38px;
+    height: 38px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: none;
+
+    background: #fee2e2;
+    color: #dc2626;
+
+    border-radius: 7px;
+
+    font-size: 15px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.delete-button:hover {
+    background: #fecaca;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================================
+   EMPTY DATA
+===================================================== */
+
+.empty-data {
+    padding: 45px 20px !important;
+
+    color: #94a3b8;
+
+    text-align: center;
+
+    font-size: 14px;
+}
+
+
+/* =====================================================
+   ALERT
+===================================================== */
+
+.alert-success {
+    width: calc(100% - 88px);
+    max-width: 1412px;
+
+    margin: 18px auto 0;
+
+    padding: 12px 18px;
+
+    background: #f0fdf4;
+
+    border: 1px solid #bbf7d0;
+
+    border-radius: 8px;
+
+    color: #166534;
+
+    font-size: 14px;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 900px) {
+
+    .page-section {
+        padding: 70px 20px 40px;
+    }
+
+    .page-top {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .page-action {
+        width: 100%;
+    }
+
+    .add-button {
+        width: 100%;
+    }
+
+    .data-info {
+        gap: 10px;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .page-section {
+        padding: 65px 15px 35px;
+    }
+
+    .data-info {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+    .info-right {
+        display: none;
+    }
+
+    th,
+    td {
+        padding: 13px 12px;
+    }
+
+}
+
+</style>
+@endpush

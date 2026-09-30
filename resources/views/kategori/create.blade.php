@@ -1,134 +1,70 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.app')
 
-    <title>Tambah Kategori - Kalisawah</title>
+@section('content')
 
-    <style>
-        * {
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
+<div class="create-page">
 
-        body {
-            margin: 0;
-            background: #f5f7fb;
-            color: #1e293b;
-        }
+    {{-- HEADER --}}
+    <div class="page-header">
 
-        .container {
-            width: 600px;
-            max-width: 90%;
-            margin: 60px auto;
-        }
+        {{-- TOMBOL KEMBALI KE KATEGORI --}}
+        <a href="{{ route('kategori.index') }}" class="back-home-button">
+          Kembali ke beranda
+        </a>
 
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 3px 12px rgba(0,0,0,.06);
-        }
+        <div class="header-content">
 
-        h1 {
-            margin-bottom: 8px;
-            color: #0b4f9c;
-        }
+            <span class="page-eyebrow">
+                MASTER DATA
+            </span>
 
-        .description {
-            color: #64748b;
-            margin-bottom: 25px;
-        }
+            <h1>
+                Tambah Kategori Aset
+            </h1>
 
-        .form-group {
-            margin-bottom: 18px;
-        }
+            <p>
+                Tambahkan kategori aset baru ke dalam sistem.
+            </p>
 
-        label {
-            display: block;
-            margin-bottom: 7px;
-            font-size: 14px;
-            font-weight: bold;
-        }
+        </div>
 
-        input,
-        textarea {
-            width: 100%;
-            padding: 11px;
-            border: 1px solid #cbd5e1;
-            border-radius: 7px;
-            font-size: 14px;
-            outline: none;
-        }
+    </div>
 
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
 
-        input:focus,
-        textarea:focus {
-            border-color: #0b4f9c;
-        }
-
-        .error {
-            color: #dc2626;
-            font-size: 13px;
-            margin-top: 5px;
-        }
-
-        .actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 25px;
-        }
-
-        .btn {
-            padding: 11px 18px;
-            border: none;
-            border-radius: 7px;
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 13px;
-        }
-
-        .btn-cancel {
-            background: #e2e8f0;
-            color: #475569;
-        }
-
-        .btn-save {
-            background: #0b4f9c;
-            color: white;
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="container">
-
-    <div class="card">
-
-        <h1>Tambah Kategori Aset</h1>
-
-        <p class="description">
-            Tambahkan kategori utama baru untuk aset Kalisawah.
-        </p>
+    {{-- FORM --}}
+    <div class="form-card">
 
         <form
             action="{{ route('kategori.store') }}"
-            method="POST">
+            method="POST"
+        >
 
             @csrf
 
+
+            {{-- ID KATEGORI --}}
+            <div class="form-group">
+
+                <label for="id_kategori">
+                    ID Kategori
+                </label>
+
+                <input
+                    type="text"
+                    id="id_kategori"
+                    name="id_kategori"
+                    value="{{ $idKategoriBaru ?? old('id_kategori') }}"
+                    readonly
+                >
+
+            </div>
+
+
+            {{-- NAMA KATEGORI --}}
             <div class="form-group">
 
                 <label for="nama_kategori">
-                    Nama Kategori
+                    Nama Kategori <span>*</span>
                 </label>
 
                 <input
@@ -137,17 +73,19 @@
                     name="nama_kategori"
                     value="{{ old('nama_kategori') }}"
                     placeholder="Masukkan nama kategori"
-                    required>
+                    required
+                >
 
                 @error('nama_kategori')
-                    <div class="error">
+                    <small class="input-error">
                         {{ $message }}
-                    </div>
+                    </small>
                 @enderror
 
             </div>
 
 
+            {{-- DESKRIPSI --}}
             <div class="form-group">
 
                 <label for="Deskripsi">
@@ -157,29 +95,46 @@
                 <textarea
                     id="Deskripsi"
                     name="Deskripsi"
-                    placeholder="Masukkan deskripsi kategori">{{ old('Deskripsi') }}</textarea>
+                    rows="5"
+                    placeholder="Masukkan deskripsi kategori..."
+                >{{ old('Deskripsi') }}</textarea>
 
                 @error('Deskripsi')
-                    <div class="error">
+                    <small class="input-error">
                         {{ $message }}
-                    </div>
+                    </small>
                 @enderror
 
             </div>
 
 
-            <div class="actions">
+            {{-- CATATAN --}}
+            <div class="form-note">
+
+                <strong>Catatan:</strong>
+
+                Pastikan nama kategori yang dimasukkan sudah sesuai.
+                Setelah kategori dibuat, Sub Kategori dapat ditambahkan
+                melalui tombol <strong>+</strong> pada daftar kategori.
+
+            </div>
+
+
+            {{-- BUTTON --}}
+            <div class="form-actions">
 
                 <a
                     href="{{ route('kategori.index') }}"
-                    class="btn btn-cancel">
+                    class="cancel-button"
+                >
                     Batal
                 </a>
 
                 <button
                     type="submit"
-                    class="btn btn-save">
-                    Simpan
+                    class="save-button"
+                >
+                    Simpan Kategori
                 </button>
 
             </div>
@@ -190,5 +145,368 @@
 
 </div>
 
-</body>
-</html>
+@endsection
+
+
+@push('styles')
+<style>
+
+/* =====================================================
+   HALAMAN
+===================================================== */
+
+.create-page {
+    width: 100%;
+    max-width: 1000px;
+
+    margin: 0 auto;
+
+    padding: 105px 30px 60px;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+
+
+
+/* =====================================================
+   TOMBOL KEMBALI KE BERANDA
+===================================================== */
+
+.back-home-button {
+    display: inline-flex;
+
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 18px;
+
+    padding: 10px 16px;
+
+    background: #11569c;
+    color: #ffffff;
+
+    border: 1px solid #11569c;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition: 0.2s;
+
+    box-shadow: 0 2px 5px rgba(17, 86, 156, 0.15);
+}
+
+.back-home-button:hover {
+    background: #0d477f;
+    border-color: #0d477f;
+    color: #ffffff;
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 4px 8px rgba(17, 86, 156, 0.20);
+}
+
+
+/* =====================================================
+   JUDUL
+===================================================== */
+
+.header-content {
+    padding-left: 2px;
+}
+
+.page-eyebrow {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #2563eb;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+.page-header h1 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 28px;
+
+    line-height: 1.3;
+
+    font-weight: 700;
+}
+
+.page-header p {
+    margin: 7px 0 0;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   FORM CARD
+===================================================== */
+
+.form-card {
+    width: 100%;
+
+    max-width: 850px;
+
+    margin: 0 auto;
+
+    background: white;
+
+    padding: 28px;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 10px;
+
+    box-sizing: border-box;
+}
+
+
+/* =====================================================
+   FORM GROUP
+===================================================== */
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    font-weight: 600;
+}
+
+.form-group label span {
+    color: #dc2626;
+}
+
+
+/* =====================================================
+   INPUT & TEXTAREA
+===================================================== */
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px 13px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 7px;
+
+    outline: none;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    color: #334155;
+
+    background: #ffffff;
+
+    transition: 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #2563eb;
+
+    box-shadow: 0 0 0 3px #dbeafe;
+}
+
+
+/* =====================================================
+   ID READONLY
+===================================================== */
+
+.form-group input[readonly] {
+    background: #f8fafc;
+
+    color: #64748b;
+
+    cursor: not-allowed;
+}
+
+
+/* =====================================================
+   TEXTAREA
+===================================================== */
+
+.form-group textarea {
+    resize: vertical;
+
+    min-height: 120px;
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.input-error {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #dc2626;
+
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   CATATAN
+===================================================== */
+
+.form-note {
+    margin-bottom: 24px;
+
+    padding: 13px 15px;
+
+    background: #fffbeb;
+
+    border: 1px solid #fde68a;
+
+    border-radius: 7px;
+
+    color: #92400e;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   BUTTON FORM
+===================================================== */
+
+.form-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #e2e8f0;
+}
+
+.cancel-button,
+.save-button {
+    padding: 11px 18px;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+/* BATAL */
+
+.cancel-button {
+    background: #f1f5f9;
+
+    color: #475569;
+}
+
+.cancel-button:hover {
+    background: #e2e8f0;
+}
+
+
+/* SIMPAN */
+
+.save-button {
+    border: none;
+
+    background: #2563eb;
+
+    color: white;
+}
+
+.save-button:hover {
+    background: #1d4ed8;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+
+    .create-page {
+        padding: 90px 20px 40px;
+    }
+
+    .page-header h1 {
+        font-size: 24px;
+    }
+
+    .form-card {
+        padding: 20px;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .cancel-button,
+    .save-button {
+        width: 100%;
+
+        text-align: center;
+
+        box-sizing: border-box;
+    }
+
+}
+
+</style>
+@endpush

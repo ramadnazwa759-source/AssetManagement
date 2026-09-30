@@ -78,4 +78,33 @@ class AsetController extends Controller
         );
     }
 
+     // Menampilkan detail aset
+    public function show(string $id)
+    {
+        $aset = Aset::with([
+            'jenis',
+            'lokasi'
+        ])->findOrFail($id);
+
+        return view(
+            'asset-management.aset.show',
+            compact('aset')
+        );
+    }
+
+    // Menampilkan form edit aset
+    public function edit(string $id)
+    {
+        $aset = Aset::with([
+            'jenis',
+            'lokasi'
+        ])->findOrFail($id);
+
+        $lokasi = LokasiAset::all();
+
+        return view(
+            'asset-management.aset.edit',
+            compact('aset', 'lokasi')
+        );
+    }
 }

@@ -262,4 +262,115 @@ class PeminjamanAsetController extends Controller
                 'Transaksi peminjaman berhasil disimpan.'
             );
     }
+       // Menampilkan detail peminjaman
+    public function show(string $id)
+    {
+        $peminjaman = PeminjamanAset::with([
+            'detailPeminjaman.jenis',
+            'detailPeminjaman.detailUnit.aset'
+        ])->findOrFail($id);
+
+        return view(
+            'asset-management.peminjaman.show',
+            compact('peminjaman')
+        );
+    }
+
+    // Membatalkan transaksi peminjaman
+    public function batal(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'catatan' =>
+                'required|string'
+        ]);
+
+        DB::transaction(function () use (
+            $validated,
+            $id
+        ) {
+
+            $peminjaman = PeminjamanAset::with([
+                'detailPeminjaman.detailUnit'
+            ])
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            // Transaksi yang sudah selesai tidak dapat dibatalkan
+            if (
+                $peminjaman->status_peminjaman !== 'Dipinjam'
+            ) {
+                throw ValidationException::withMessages([
+                    'catatan' =>
+                        'Peminjaman ini tidak dapat dibatalkan.'
+                ]);
+            }
+
+            foreach (
+                $peminjaman
+                    ->detailPeminjaman
+                    as $detail
+            ) {
+
+                foreach (
+                    $detail->detailUnit
+                    as $unit
+                ) {
+
+                    // Mengembalikan status unit menjadi tersedia
+                    Aset::where(
+                        'kode_aset',
+                        $unit->kode_aset
+                    )->update([
+                        'status_aset' =>
+                            'Tersedia'
+                    ]);
+
+                    // Mengubah status unit peminjaman
+                    $unit->update([
+                        'status_unit' =>
+                            'Dikembalikan',
+
+                        'tanggal_dikembalikan' =>
+                            now()->toDateString(),
+                    ]);
+                }
+            }
+
+            // Mengubah status transaksi
+            $peminjaman->update([
+                'status_peminjaman' =>
+                    'Dibatalkan',
+
+                'catatan' =>
+                    $validated['catatan'],
+            ]);
+        });
+
+        return redirect()
+            ->route('peminjaman.index')
+            ->with(
+                'success',
+                'Transaksi peminjaman berhasil dibatalkan.'
+            );
+    }
+
+    // Membuat kode peminjaman otomatis
+    private function generateKodePeminjaman()
+    {
+        do {
+            $kode = 'PMJ-' .
+                now()->format('Ymd') .
+                '-' .
+                strtoupper(
+                    Str::random(4)
+                );
+        } while (
+            PeminjamanAset::where(
+                'kode_peminjaman',
+                $kode
+            )->exists()
+        );
+
+        return $kode;
+    }
 }

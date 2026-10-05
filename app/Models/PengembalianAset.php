@@ -11,10 +11,11 @@ class PengembalianAset extends Model
     protected $primaryKey = 'id_pengembalian';
 
     protected $fillable = [
-        'id_peminjaman',
-        'tanggal_pengembalian',
-        'jumlah_barang',
-        'catatan',
+    'kode_pengembalian',
+    'id_peminjaman',
+    'tanggal_pengembalian',
+    'jumlah_barang',
+    'catatan',
     ];
 
     protected $casts = [

@@ -143,7 +143,7 @@ class JenisAsetController extends Controller
                 'keterangan' => null,
             ]);
         }
-    });
+    }
 
     return redirect()
         ->route('jenis-aset.index')

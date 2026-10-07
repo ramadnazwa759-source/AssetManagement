@@ -108,6 +108,30 @@
 
             </div>
 
+            {{-- SEARCH --}}
+            <form
+                action="{{ route('kategori.sub-kategori.index', $kategori->id_kategori) }}"
+                method="GET"
+                class="search-form"
+            >
+
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Cari sub kategori..."
+                >
+
+                <button
+                    type="submit"
+                    class="search-button"
+                    title="Cari"
+                >
+                    🔍
+                </button>
+
+            </form>
+
         </div>
 
 
@@ -175,7 +199,6 @@
 
                                 <div class="action-buttons">
 
-
                                     {{-- EDIT --}}
                                     <a
                                         href="{{ route(
@@ -190,21 +213,6 @@
                                     >
                                         ✎
                                     </a>
-
-
-                                    {{-- HAPUS --}}
-                                    <button
-                                        type="button"
-                                        class="delete-button"
-                                        title="Hapus Sub Kategori"
-                                        onclick="openDeleteModal(
-                                            '{{ $item->id_sub_kategori }}',
-                                            @js($item->nama_sub_kategori)
-                                        )"
-                                    >
-                                        🗑
-                                        <span>Hapus</span>
-                                    </button>
 
                                 </div>
 
@@ -222,8 +230,18 @@
                                 class="empty-data"
                             >
 
-                                Belum ada sub kategori untuk
-                                kategori ini.
+                                @if(request('search'))
+
+                                    Sub kategori
+                                    "{{ request('search') }}"
+                                    tidak ditemukan.
+
+                                @else
+
+                                    Belum ada sub kategori untuk
+                                    kategori ini.
+
+                                @endif
 
                             </td>
 
@@ -239,87 +257,8 @@
 
     </div>
 
+
 </section>
-
-
-{{-- =====================================================
-    MODAL KONFIRMASI HAPUS
-===================================================== --}}
-
-<div
-    id="deleteModal"
-    class="delete-modal"
->
-
-    <div class="delete-modal-content">
-
-
-        {{-- ICON --}}
-
-        <div class="delete-icon">
-            🗑
-        </div>
-
-
-        {{-- JUDUL --}}
-
-        <h3>
-            Hapus Sub Kategori?
-        </h3>
-
-
-        {{-- PESAN --}}
-
-        <p>
-
-            Apakah kamu yakin ingin menghapus sub kategori
-
-            <strong id="deleteSubCategoryName"></strong>?
-
-        </p>
-
-
-        {{-- TOMBOL --}}
-
-        <div class="delete-modal-actions">
-
-
-            {{-- TIDAK --}}
-
-            <button
-                type="button"
-                class="cancel-delete"
-                onclick="closeDeleteModal()"
-            >
-                Tidak
-            </button>
-
-
-            {{-- HAPUS --}}
-
-            <form
-                id="deleteModalForm"
-                method="POST"
-            >
-
-                @csrf
-
-                @method('DELETE')
-
-                <button
-                    type="submit"
-                    class="confirm-delete"
-                >
-                    Hapus
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-
-</div>
 
 @endsection
 
@@ -615,6 +554,14 @@
 
 .table-header {
 
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
     padding: 20px 22px;
 
     border-bottom: 1px solid #e2e8f0;
@@ -642,6 +589,83 @@
     color: #64748b;
 
     font-size: 13px;
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.search-form {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    flex-shrink: 0;
+
+}
+
+
+.search-form input {
+
+    width: 250px;
+
+    height: 38px;
+
+    padding: 0 12px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 7px;
+
+    outline: none;
+
+    color: #334155;
+
+    font-size: 13px;
+
+    box-sizing: border-box;
+
+}
+
+
+.search-form input:focus {
+
+    border-color: #2563eb;
+
+}
+
+
+.search-button {
+
+    width: 38px;
+
+    height: 38px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    transition: 0.2s;
+
+}
+
+
+.search-button:hover {
+
+    background: #1d4ed8;
 
 }
 
@@ -824,61 +848,6 @@ tbody tr:hover {
 
 
 /* =====================================================
-   HAPUS
-===================================================== */
-
-.delete-button {
-
-    min-width: 80px;
-
-    height: 38px;
-
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 6px;
-
-    padding: 0 12px;
-
-    border: none;
-
-    background: #fee2e2;
-
-    color: #dc2626;
-
-    border-radius: 7px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-
-}
-
-
-.delete-button:hover {
-
-    background: #fecaca;
-
-    transform: translateY(-1px);
-
-}
-
-
-.delete-button span {
-
-    font-size: 13px;
-
-}
-
-
-/* =====================================================
    EMPTY DATA
 ===================================================== */
 
@@ -925,200 +894,6 @@ tbody tr:hover {
 
 
 /* =====================================================
-   MODAL
-===================================================== */
-
-.delete-modal {
-
-    display: none;
-
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 9999;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 20px;
-
-    background: rgba(15, 23, 42, 0.45);
-
-    box-sizing: border-box;
-
-}
-
-
-.delete-modal.show {
-
-    display: flex;
-
-}
-
-
-.delete-modal-content {
-
-    width: 100%;
-
-    max-width: 420px;
-
-    padding: 30px;
-
-    background: #ffffff;
-
-    border-radius: 12px;
-
-    text-align: center;
-
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-
-    box-sizing: border-box;
-
-}
-
-
-.delete-icon {
-
-    width: 52px;
-
-    height: 52px;
-
-    margin: 0 auto 16px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    background: #fee2e2;
-
-    color: #dc2626;
-
-    border-radius: 50%;
-
-    font-size: 22px;
-
-}
-
-
-.delete-modal-content h3 {
-
-    margin: 0 0 8px;
-
-    color: #0f172a;
-
-    font-size: 20px;
-
-    font-weight: 700;
-
-}
-
-
-.delete-modal-content p {
-
-    margin: 0;
-
-    color: #64748b;
-
-    font-size: 14px;
-
-    line-height: 1.6;
-
-}
-
-
-.delete-modal-content p strong {
-
-    color: #0f172a;
-
-}
-
-
-/* =====================================================
-   MODAL BUTTON
-===================================================== */
-
-.delete-modal-actions {
-
-    display: flex;
-
-    justify-content: center;
-
-    gap: 10px;
-
-    margin-top: 25px;
-
-}
-
-
-.cancel-delete {
-
-    min-width: 100px;
-
-    padding: 10px 18px;
-
-    background: #ffffff;
-
-    color: #475569;
-
-    border: 1px solid #cbd5e1;
-
-    border-radius: 7px;
-
-    font-size: 14px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-
-}
-
-
-.cancel-delete:hover {
-
-    background: #f8fafc;
-
-}
-
-
-.confirm-delete {
-
-    min-width: 100px;
-
-    padding: 10px 18px;
-
-    background: #dc2626;
-
-    color: #ffffff;
-
-    border: 1px solid #dc2626;
-
-    border-radius: 7px;
-
-    font-size: 14px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-
-}
-
-
-.confirm-delete:hover {
-
-    background: #b91c1c;
-
-}
-
-
-/* =====================================================
    RESPONSIVE
 ===================================================== */
 
@@ -1160,6 +935,31 @@ tbody tr:hover {
 
     }
 
+
+    .table-header {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .search-form {
+
+        width: 100%;
+
+    }
+
+
+    .search-form input {
+
+        flex: 1;
+
+        width: auto;
+
+    }
+
 }
 
 
@@ -1197,137 +997,8 @@ tbody tr:hover {
 
     }
 
-
-    .delete-modal-content {
-
-        padding: 25px 20px;
-
-    }
-
-
-    .delete-modal-actions {
-
-        width: 100%;
-
-    }
-
-
-    .cancel-delete,
-    .confirm-delete {
-
-        flex: 1;
-
-    }
-
 }
 
 </style>
-
-@endpush
-
-
-{{-- =====================================================
-    JAVASCRIPT
-===================================================== --}}
-
-@push('scripts')
-
-<script>
-
-function openDeleteModal(id, nama) {
-
-    const modal =
-        document.getElementById('deleteModal');
-
-    const form =
-        document.getElementById('deleteModalForm');
-
-    const subCategoryName =
-        document.getElementById('deleteSubCategoryName');
-
-
-    if (!modal || !form || !subCategoryName) {
-
-        return;
-
-    }
-
-
-    // Menampilkan nama sub kategori
-
-    subCategoryName.textContent = nama;
-
-
-    // URL hapus sub kategori
-
-    form.action =
-        '/kategori/{{ $kategori->id_kategori }}/sub-kategori/' + id;
-
-
-    // Menampilkan modal
-
-    modal.classList.add('show');
-
-}
-
-
-function closeDeleteModal() {
-
-    const modal =
-        document.getElementById('deleteModal');
-
-
-    if (!modal) {
-
-        return;
-
-    }
-
-
-    modal.classList.remove('show');
-
-}
-
-
-/* Klik area luar modal */
-
-const deleteModal =
-    document.getElementById('deleteModal');
-
-
-if (deleteModal) {
-
-    deleteModal.addEventListener(
-        'click',
-        function(event) {
-
-            if (event.target === this) {
-
-                closeDeleteModal();
-
-            }
-
-        }
-    );
-
-}
-
-
-/* Tombol ESC */
-
-document.addEventListener(
-    'keydown',
-    function(event) {
-
-        if (event.key === 'Escape') {
-
-            closeDeleteModal();
-
-        }
-
-    }
-);
-
-</script>
 
 @endpush

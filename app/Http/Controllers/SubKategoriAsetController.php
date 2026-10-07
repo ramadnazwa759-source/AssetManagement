@@ -8,29 +8,77 @@ use Illuminate\Http\Request;
 
 class SubKategoriAsetController extends Controller
 {
-    // Menampilkan sub kategori berdasarkan kategori
-    public function index($id_kategori)
+    // =====================================================
+    // MENAMPILKAN SUB KATEGORI BERDASARKAN KATEGORI + SEARCH
+    // =====================================================
+
+    public function index(Request $request, $id_kategori)
     {
+        // Pastikan kategori induknya ada
         $kategori = KategoriAset::findOrFail($id_kategori);
 
-        $subKategori = SubKategoriAset::where(
+        // Query sub kategori berdasarkan kategori induk
+        $query = SubKategoriAset::where(
             'id_kategori',
             $id_kategori
-        )->get();
+        );
 
-        return view('sub-kategori.index', compact(
-            'kategori',
-            'subKategori'
-        ));
+        // Pencarian berdasarkan nama sub kategori
+        if ($request->filled('search')) {
+            $query->where(
+                'nama_sub_kategori',
+                'like',
+                '%' . $request->search . '%'
+            );
+        }
+
+        // Ambil data sub kategori
+        $subKategori = $query->get();
+
+        return view(
+            'sub-kategori.index',
+            compact('kategori', 'subKategori')
+        );
     }
 
 
-    // Menampilkan form tambah sub kategori
-    public function create($id_kategori)
+    // =====================================================
+    // MENAMPILKAN DETAIL SUB KATEGORI
+    // =====================================================
+
+    public function show($id_kategori, $id)
     {
+        // Pastikan kategori induknya ada
         $kategori = KategoriAset::findOrFail($id_kategori);
 
-        // Membuat ID sub kategori berikutnya
+        // Cari sub kategori berdasarkan ID dan kategori induknya
+        $subKategori = SubKategoriAset::where(
+            'id_sub_kategori',
+            $id
+        )
+        ->where(
+            'id_kategori',
+            $id_kategori
+        )
+        ->firstOrFail();
+
+        return view(
+            'sub-kategori.show',
+            compact('kategori', 'subKategori')
+        );
+    }
+
+
+    // =====================================================
+    // FORM TAMBAH SUB KATEGORI
+    // =====================================================
+
+    public function create($id_kategori)
+    {
+        // Pastikan kategori induknya ada
+        $kategori = KategoriAset::findOrFail($id_kategori);
+
+        // Mencari nomor ID sub kategori terakhir
         $nomorTerakhir = SubKategoriAset::all()
             ->map(function ($item) {
                 return (int) str_replace(
@@ -41,6 +89,7 @@ class SubKategoriAsetController extends Controller
             })
             ->max() ?? 0;
 
+        // Membuat ID sub kategori baru
         $idSubKategoriBaru = 'SUB-' . str_pad(
             $nomorTerakhir + 1,
             2,
@@ -48,26 +97,30 @@ class SubKategoriAsetController extends Controller
             STR_PAD_LEFT
         );
 
-        return view('sub-kategori.create', compact(
-            'kategori',
-            'idSubKategoriBaru'
-        ));
+        return view(
+            'sub-kategori.create',
+            compact('kategori', 'idSubKategoriBaru')
+        );
     }
 
 
-    // Menyimpan sub kategori
+    // =====================================================
+    // MENYIMPAN SUB KATEGORI
+    // =====================================================
+
     public function store(Request $request, $id_kategori)
     {
-        // Pastikan kategori yang dipilih memang ada
+        // Pastikan kategori induknya ada
         $kategori = KategoriAset::findOrFail($id_kategori);
 
+        // Validasi data
         $request->validate([
             'nama_sub_kategori' => 'required|string|max:100',
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'deskripsi' => 'nullable|string',
         ]);
 
-        // Membuat ID sub kategori berikutnya
+        // Mencari nomor ID sub kategori terakhir
         $nomorTerakhir = SubKategoriAset::all()
             ->map(function ($item) {
                 return (int) str_replace(
@@ -78,6 +131,7 @@ class SubKategoriAsetController extends Controller
             })
             ->max() ?? 0;
 
+        // Membuat ID sub kategori baru
         $idSubKategori = 'SUB-' . str_pad(
             $nomorTerakhir + 1,
             2,
@@ -93,6 +147,7 @@ class SubKategoriAsetController extends Controller
                 ->store('sub-kategori', 'public');
         }
 
+        // Simpan data sub kategori
         SubKategoriAset::create([
             'id_sub_kategori' => $idSubKategori,
             'id_kategori' => $id_kategori,
@@ -113,35 +168,13 @@ class SubKategoriAsetController extends Controller
     }
 
 
-    // Menampilkan form edit sub kategori
+    // =====================================================
+    // FORM EDIT SUB KATEGORI
+    // =====================================================
+
     public function edit($id_kategori, $id)
     {
-        $kategori = KategoriAset::findOrFail($id_kategori);
-
-        // Cari sub kategori berdasarkan ID dan kategori induknya
-        $subKategori = SubKategoriAset::where(
-            'id_sub_kategori',
-            $id
-        )
-        ->where(
-            'id_kategori',
-            $id_kategori
-        )
-        ->firstOrFail();
-
-        return view('sub-kategori.edit', compact(
-            'kategori',
-            'subKategori'
-        ));
-    }
-
-
-    // Mengubah sub kategori
-    public function update(
-        Request $request,
-        $id_kategori,
-        $id
-    ) {
+        // Pastikan kategori induknya ada
         $kategori = KategoriAset::findOrFail($id_kategori);
 
         // Cari sub kategori berdasarkan kategori + ID
@@ -155,6 +188,37 @@ class SubKategoriAsetController extends Controller
         )
         ->firstOrFail();
 
+        return view(
+            'sub-kategori.edit',
+            compact('kategori', 'subKategori')
+        );
+    }
+
+
+    // =====================================================
+    // UPDATE / MENGUBAH SUB KATEGORI
+    // =====================================================
+
+    public function update(
+        Request $request,
+        $id_kategori,
+        $id
+    ) {
+        // Pastikan kategori induknya ada
+        $kategori = KategoriAset::findOrFail($id_kategori);
+
+        // Cari sub kategori berdasarkan kategori + ID
+        $subKategori = SubKategoriAset::where(
+            'id_sub_kategori',
+            $id
+        )
+        ->where(
+            'id_kategori',
+            $id_kategori
+        )
+        ->firstOrFail();
+
+        // Validasi
         $request->validate([
             'nama_sub_kategori' => 'required|string|max:100',
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
@@ -172,6 +236,7 @@ class SubKategoriAsetController extends Controller
                 ->store('sub-kategori', 'public');
         }
 
+        // Update data
         $subKategori->update($data);
 
         return redirect()
@@ -186,34 +251,18 @@ class SubKategoriAsetController extends Controller
     }
 
 
-    // Menghapus sub kategori
-    public function destroy($id_kategori, $id)
-    {
-        // Pastikan kategori induknya ada
-        $kategori = KategoriAset::findOrFail($id_kategori);
+    // =====================================================
+    // MENGAMBIL SUB KATEGORI BERDASARKAN KATEGORI
+    // Untuk kebutuhan AJAX/API
+    // =====================================================
 
-        // Cari sub kategori berdasarkan kategori + ID
+    public function berdasarkanKategori($id_kategori)
+    {
         $subKategori = SubKategoriAset::where(
-            'id_sub_kategori',
-            $id
-        )
-        ->where(
             'id_kategori',
             $id_kategori
-        )
-        ->firstOrFail();
+        )->get();
 
-        // Hapus sub kategori
-        $subKategori->delete();
-
-        return redirect()
-            ->route(
-                'kategori.sub-kategori.index',
-                $id_kategori
-            )
-            ->with(
-                'success',
-                'Sub kategori berhasil dihapus.'
-            );
+        return response()->json($subKategori);
     }
 }

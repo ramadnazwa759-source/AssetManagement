@@ -6,7 +6,7 @@ use App\Http\Controllers\KategoriAsetController;
 use App\Http\Controllers\SubKategoriAsetController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisAsetController;
-
+use App\Http\Controllers\LokasiAsetController;
 
 // =====================================================
 // LOGIN
@@ -51,9 +51,14 @@ Route::get('/kategori/{id}/update', [KategoriAsetController::class, 'edit'])
 Route::put('/kategori/{id}', [KategoriAsetController::class, 'update'])
     ->name('kategori.update');
 
+
 // Hapus kategori
 Route::delete('/kategori/{id}', [KategoriAsetController::class, 'destroy'])
     ->name('kategori.destroy');
+
+Route::get('/kategori/{kategori}', [KategoriAsetController::class, 'show'])
+    ->name('kategori.show');
+
 
 // =====================================================
 // SUB KATEGORI ASET
@@ -102,3 +107,25 @@ Route::patch('/jenis-aset/{id}/status', [JenisAsetController::class, 'ubahStatus
 
 Route::get('/jenis-aset/{id}', [JenisAsetController::class, 'show'])
     ->name('jenis-aset.show');
+
+// LOKASI ASET
+Route::get('/lokasi', [LokasiAsetController::class, 'index'])
+    ->name('lokasi.index');
+
+Route::get('/lokasi/create', [LokasiAsetController::class, 'create'])
+    ->name('lokasi.create');
+
+Route::post('/lokasi', [LokasiAsetController::class, 'store'])
+    ->name('lokasi.store');
+
+// Edit hanya deskripsi
+Route::get('/lokasi/{id}/edit', [LokasiAsetController::class, 'edit'])
+    ->name('lokasi.edit');
+
+Route::put('/lokasi/{id}', [LokasiAsetController::class, 'update'])
+    ->name('lokasi.update');
+
+// Detail lokasi
+Route::get('/lokasi/{id}', [LokasiAsetController::class, 'show'])
+    ->name('lokasi.show');
+    

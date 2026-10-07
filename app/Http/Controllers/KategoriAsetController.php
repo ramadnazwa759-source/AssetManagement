@@ -3,21 +3,40 @@
 namespace App\Http\Controllers;
 
 use App\Models\KategoriAset;
+use App\Models\SubKategoriAset;
 use Illuminate\Http\Request;
 
 class KategoriAsetController extends Controller
 {
     // =====================================================
-    // MENAMPILKAN SEMUA KATEGORI
+    // MENAMPILKAN SEMUA KATEGORI + SEARCH
     // =====================================================
 
-    public function index()
+    public function index(Request $request)
     {
-        $kategori = KategoriAset::all();
+        // Query kategori
+        $query = KategoriAset::query();
 
-        return view('kategori.index', compact('kategori'));
+        // Pencarian berdasarkan nama kategori
+        if ($request->filled('search')) {
+            $query->where(
+                'nama_kategori',
+                'like',
+                '%' . $request->search . '%'
+            );
+        }
+
+        // Ambil data kategori
+        $kategori = $query->get();
+
+        // Ambil semua sub kategori
+        $subKategori = SubKategoriAset::all();
+
+        return view(
+            'kategori.index',
+            compact('kategori', 'subKategori')
+        );
     }
-
 
     // =====================================================
     // FORM TAMBAH KATEGORI
@@ -25,14 +44,16 @@ class KategoriAsetController extends Controller
 
     public function create()
     {
-        // Mencari nomor ID kategori terakhir
         $nomorTerakhir = KategoriAset::all()
             ->map(function ($item) {
-                return (int) str_replace('KAT-', '', $item->id_kategori);
+                return (int) str_replace(
+                    'KAT-',
+                    '',
+                    $item->id_kategori
+                );
             })
             ->max() ?? 0;
 
-        // Membuat ID kategori baru
         $idKategoriBaru = 'KAT-' . str_pad(
             $nomorTerakhir + 1,
             2,
@@ -40,9 +61,11 @@ class KategoriAsetController extends Controller
             STR_PAD_LEFT
         );
 
-        return view('kategori.create', compact('idKategoriBaru'));
+        return view(
+            'kategori.create',
+            compact('idKategoriBaru')
+        );
     }
-
 
     // =====================================================
     // MENYIMPAN KATEGORI BARU
@@ -52,17 +75,19 @@ class KategoriAsetController extends Controller
     {
         $request->validate([
             'nama_kategori' => 'required|string|max:100|unique:kategori_aset,nama_kategori',
-            'Deskripsi' => 'nullable|string',
+            'deskripsi' => 'nullable|string',
         ]);
 
-        // Mencari nomor ID kategori terakhir
         $nomorTerakhir = KategoriAset::all()
             ->map(function ($item) {
-                return (int) str_replace('KAT-', '', $item->id_kategori);
+                return (int) str_replace(
+                    'KAT-',
+                    '',
+                    $item->id_kategori
+                );
             })
             ->max() ?? 0;
 
-        // Membuat ID kategori
         $idKategori = 'KAT-' . str_pad(
             $nomorTerakhir + 1,
             2,
@@ -70,11 +95,10 @@ class KategoriAsetController extends Controller
             STR_PAD_LEFT
         );
 
-        // Simpan data
         KategoriAset::create([
             'id_kategori' => $idKategori,
             'nama_kategori' => $request->nama_kategori,
-            'Deskripsi' => $request->Deskripsi,
+            'deskripsi' => $request->deskripsi,
         ]);
 
         return redirect()
@@ -82,6 +106,24 @@ class KategoriAsetController extends Controller
             ->with('success', 'Kategori berhasil ditambahkan.');
     }
 
+    // =====================================================
+    // MENAMPILKAN DETAIL KATEGORI
+    // =====================================================
+
+    public function show($id)
+    {
+        $kategori = KategoriAset::findOrFail($id);
+
+        $subKategori = SubKategoriAset::where(
+            'id_kategori',
+            $kategori->id_kategori
+        )->get();
+
+        return view(
+            'kategori.show',
+            compact('kategori', 'subKategori')
+        );
+    }
 
     // =====================================================
     // FORM UBAH KATEGORI
@@ -89,14 +131,13 @@ class KategoriAsetController extends Controller
 
     public function edit($id)
     {
-        // Cari kategori berdasarkan ID
         $kategori = KategoriAset::findOrFail($id);
 
-        // Karena file bernama update.blade.php,
-        // maka view yang dipanggil adalah kategori.update
-        return view('kategori.update', compact('kategori'));
+        return view(
+            'kategori.update',
+            compact('kategori')
+        );
     }
-
 
     // =====================================================
     // UPDATE / MENGUBAH KATEGORI
@@ -104,42 +145,20 @@ class KategoriAsetController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Cari kategori berdasarkan ID
         $kategori = KategoriAset::findOrFail($id);
 
-        // Validasi
         $request->validate([
             'nama_kategori' => 'required|string|max:100|unique:kategori_aset,nama_kategori,' . $id . ',id_kategori',
-            'Deskripsi' => 'nullable|string',
+            'deskripsi' => 'nullable|string',
         ]);
 
-        // Update data
         $kategori->update([
             'nama_kategori' => $request->nama_kategori,
-            'Deskripsi' => $request->Deskripsi,
+            'deskripsi' => $request->deskripsi,
         ]);
 
-        // Kembali ke halaman kategori
         return redirect()
             ->route('kategori.index')
             ->with('success', 'Kategori berhasil diubah.');
-    }
-
-
-    // =====================================================
-    // HAPUS KATEGORI
-    // =====================================================
-
-    public function destroy($id)
-    {
-        // Cari kategori
-        $kategori = KategoriAset::findOrFail($id);
-
-        // Hapus kategori
-        $kategori->delete();
-
-        return redirect()
-            ->route('kategori.index')
-            ->with('success', 'Kategori berhasil dihapus.');
     }
 }

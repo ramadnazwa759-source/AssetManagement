@@ -14,5 +14,5 @@ class KategoriAset extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = [ 'id_kategori', 'nama_kategori', 'Deskripsi', ];
+    protected $fillable = [ 'id_kategori', 'nama_kategori', 'deskripsi', ];
 }

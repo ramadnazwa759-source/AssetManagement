@@ -7,11 +7,6 @@
     {{-- HEADER --}}
     <div class="page-header">
 
-        {{-- TOMBOL KEMBALI KE KATEGORI --}}
-        <a href="{{ route('kategori.index') }}" class="back-home-button">
-          Kembali ke beranda
-        </a>
-
         <div class="header-content">
 
             <span class="page-eyebrow">
@@ -40,7 +35,6 @@
         >
 
             @csrf
-
 
             {{-- ID KATEGORI --}}
             <div class="form-group">
@@ -88,18 +82,18 @@
             {{-- DESKRIPSI --}}
             <div class="form-group">
 
-                <label for="Deskripsi">
+                <label for="deskripsi">
                     Deskripsi
                 </label>
 
                 <textarea
-                    id="Deskripsi"
-                    name="Deskripsi"
+                    id="deskripsi"
+                    name="deskripsi"
                     rows="5"
                     placeholder="Masukkan deskripsi kategori..."
-                >{{ old('Deskripsi') }}</textarea>
+                >{{ old('deskripsi') }}</textarea>
 
-                @error('Deskripsi')
+                @error('deskripsi')
                     <small class="input-error">
                         {{ $message }}
                     </small>
@@ -152,16 +146,17 @@
 <style>
 
 /* =====================================================
-   HALAMAN
+   PAGE
 ===================================================== */
 
 .create-page {
+
     width: 100%;
     max-width: 1000px;
 
     margin: 0 auto;
 
-    padding: 105px 30px 60px;
+    padding: 125px 30px 60px;
 
     box-sizing: border-box;
 }
@@ -175,61 +170,13 @@
     margin-bottom: 28px;
 }
 
-
-
-
-/* =====================================================
-   TOMBOL KEMBALI KE BERANDA
-===================================================== */
-
-.back-home-button {
-    display: inline-flex;
-
-    align-items: center;
-    gap: 8px;
-
-    margin-bottom: 18px;
-
-    padding: 10px 16px;
-
-    background: #11569c;
-    color: #ffffff;
-
-    border: 1px solid #11569c;
-
-    border-radius: 8px;
-
-    text-decoration: none;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    transition: 0.2s;
-
-    box-shadow: 0 2px 5px rgba(17, 86, 156, 0.15);
-}
-
-.back-home-button:hover {
-    background: #0d477f;
-    border-color: #0d477f;
-    color: #ffffff;
-
-    transform: translateY(-1px);
-
-    box-shadow: 0 4px 8px rgba(17, 86, 156, 0.20);
-}
-
-
-/* =====================================================
-   JUDUL
-===================================================== */
-
 .header-content {
-    padding-left: 2px;
+    display: flex;
+    flex-direction: column;
 }
 
 .page-eyebrow {
+
     display: block;
 
     margin-bottom: 5px;
@@ -244,18 +191,18 @@
 }
 
 .page-header h1 {
+
     margin: 0;
 
     color: #0f172a;
 
     font-size: 28px;
 
-    line-height: 1.3;
-
     font-weight: 700;
 }
 
 .page-header p {
+
     margin: 7px 0 0;
 
     color: #64748b;
@@ -271,6 +218,7 @@
 ===================================================== */
 
 .form-card {
+
     width: 100%;
 
     max-width: 850px;
@@ -294,10 +242,12 @@
 ===================================================== */
 
 .form-group {
+
     margin-bottom: 22px;
 }
 
 .form-group label {
+
     display: block;
 
     margin-bottom: 8px;
@@ -310,21 +260,18 @@
 }
 
 .form-group label span {
+
     color: #dc2626;
 }
 
-
-/* =====================================================
-   INPUT & TEXTAREA
-===================================================== */
-
 .form-group input,
 .form-group textarea {
+
     width: 100%;
 
     box-sizing: border-box;
 
-    padding: 12px 13px;
+    padding: 11px 13px;
 
     border: 1px solid #cbd5e1;
 
@@ -337,25 +284,18 @@
     font-size: 14px;
 
     color: #334155;
-
-    background: #ffffff;
-
-    transition: 0.2s;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
+
     border-color: #2563eb;
 
     box-shadow: 0 0 0 3px #dbeafe;
 }
 
-
-/* =====================================================
-   ID READONLY
-===================================================== */
-
 .form-group input[readonly] {
+
     background: #f8fafc;
 
     color: #64748b;
@@ -363,12 +303,8 @@
     cursor: not-allowed;
 }
 
-
-/* =====================================================
-   TEXTAREA
-===================================================== */
-
 .form-group textarea {
+
     resize: vertical;
 
     min-height: 120px;
@@ -380,6 +316,7 @@
 ===================================================== */
 
 .input-error {
+
     display: block;
 
     margin-top: 6px;
@@ -391,10 +328,11 @@
 
 
 /* =====================================================
-   CATATAN
+   NOTE
 ===================================================== */
 
 .form-note {
+
     margin-bottom: 24px;
 
     padding: 13px 15px;
@@ -414,10 +352,11 @@
 
 
 /* =====================================================
-   BUTTON FORM
+   BUTTON
 ===================================================== */
 
 .form-actions {
+
     display: flex;
 
     justify-content: flex-end;
@@ -431,6 +370,7 @@
 
 .cancel-button,
 .save-button {
+
     padding: 11px 18px;
 
     border-radius: 7px;
@@ -446,23 +386,20 @@
     transition: 0.2s;
 }
 
-
-/* BATAL */
-
 .cancel-button {
+
     background: #f1f5f9;
 
     color: #475569;
 }
 
 .cancel-button:hover {
+
     background: #e2e8f0;
 }
 
-
-/* SIMPAN */
-
 .save-button {
+
     border: none;
 
     background: #2563eb;
@@ -471,6 +408,7 @@
 }
 
 .save-button:hover {
+
     background: #1d4ed8;
 }
 
@@ -482,23 +420,23 @@
 @media (max-width: 768px) {
 
     .create-page {
-        padding: 90px 20px 40px;
-    }
 
-    .page-header h1 {
-        font-size: 24px;
+        padding: 100px 20px 40px;
     }
 
     .form-card {
+
         padding: 20px;
     }
 
     .form-actions {
+
         flex-direction: column-reverse;
     }
 
     .cancel-button,
     .save-button {
+
         width: 100%;
 
         text-align: center;

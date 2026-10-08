@@ -10,7 +10,7 @@ $masterData = [
         'title' => 'Kategori & Subkategori',
         'description' => 'Kelola pengelompokan aset',
         'icon' => '▦',
-        'link' => '#',
+        'link' => route('kategori.index'),
     ],
 
     [

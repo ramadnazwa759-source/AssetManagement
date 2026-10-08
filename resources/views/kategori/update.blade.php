@@ -93,18 +93,18 @@
             {{-- DESKRIPSI --}}
             <div class="form-group">
 
-                <label for="Deskripsi">
+                <label for="deskripsi">
                     Deskripsi
                 </label>
 
                 <textarea
-                    id="Deskripsi"
-                    name="Deskripsi"
+                    id="deskripsi"
+                    name="deskripsi"
                     rows="5"
                     placeholder="Masukkan deskripsi kategori..."
-                >{{ old('Deskripsi', $kategori->Deskripsi) }}</textarea>
+                >{{ old('deskripsi', $kategori->deskripsi) }}</textarea>
 
-                @error('Deskripsi')
+                @error('deskripsi')
                     <small class="input-error">
                         {{ $message }}
                     </small>

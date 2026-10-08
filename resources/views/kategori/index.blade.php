@@ -3,9 +3,13 @@
 @section('content')
 
 @if (session('success'))
+
     <div class="alert-success">
+
         ✓ {{ session('success') }}
+
     </div>
+
 @endif
 
 <section class="page-section">
@@ -19,20 +23,27 @@
         <div class="page-heading">
 
             <a href="{{ route('dashboard') }}" class="back-link">
-                ← Kembali ke Beranda
+
+                ← Kembali ke Dashboard
+
             </a>
 
             <span class="page-eyebrow">
+
                 MASTER DATA
+
             </span>
 
             <h1>Kategori Aset</h1>
 
             <p>
+
                 Kelola kategori aset yang digunakan dalam sistem Asset Management.
+
             </p>
 
         </div>
+
 
         <div class="page-action">
 
@@ -40,13 +51,17 @@
                 href="{{ route('kategori.create') }}"
                 class="add-button"
             >
+
                 <span>+</span>
+
                 Tambah Kategori Aset
+
             </a>
 
         </div>
 
     </div>
+
 
 
     {{-- =====================================================
@@ -58,20 +73,27 @@
         <div class="info-left">
 
             <strong>
+
                 {{ $kategori->count() }}
+
             </strong>
 
             <span>
+
                 Kategori aset terdaftar
+
             </span>
 
         </div>
 
         <div class="info-right">
+
             Data master kategori aset
+
         </div>
 
     </div>
+
 
 
     {{-- =====================================================
@@ -87,14 +109,19 @@
             <div>
 
                 <h3>
+
                     Daftar Kategori Aset
+
                 </h3>
 
                 <p>
+
                     Daftar kategori aset yang tersimpan dalam sistem.
+
                 </p>
 
             </div>
+
 
 
             {{-- SEARCH --}}
@@ -117,12 +144,15 @@
                     class="search-button"
                     title="Cari"
                 >
+
                     🔍
+
                 </button>
 
             </form>
 
         </div>
+
 
 
         {{-- =====================================================
@@ -150,6 +180,7 @@
                 </thead>
 
 
+
                 <tbody>
 
                     @forelse ($kategori as $item)
@@ -161,10 +192,13 @@
                             <td>
 
                                 <span class="kode-badge">
+
                                     {{ $item->id_kategori }}
+
                                 </span>
 
                             </td>
+
 
 
                             {{-- NAMA KATEGORI --}}
@@ -172,10 +206,13 @@
                             <td>
 
                                 <strong class="kategori-name">
+
                                     {{ $item->nama_kategori }}
+
                                 </strong>
 
                             </td>
+
 
 
                             {{-- DESKRIPSI --}}
@@ -183,10 +220,13 @@
                             <td>
 
                                 <span class="deskripsi-text">
+
                                     {{ $item->deskripsi ?: '-' }}
+
                                 </span>
 
                             </td>
+
 
 
                             {{-- AKSI --}}
@@ -205,21 +245,26 @@
                                         class="sub-button"
                                         title="Kelola Sub Kategori"
                                     >
+
                                         +
+
                                     </a>
+
 
 
                                     {{-- EDIT KATEGORI --}}
 
                                     <a
                                         href="{{ route(
-                                            'kategori.update.form',
+                                            'kategori.edit',
                                             $item->id_kategori
                                         ) }}"
                                         class="edit-button"
                                         title="Ubah Kategori"
                                     >
+
                                         ✎
+
                                     </a>
 
                                 </div>
@@ -227,6 +272,7 @@
                             </td>
 
                         </tr>
+
 
 
                     @empty
@@ -241,7 +287,9 @@
                                 @if(request('search'))
 
                                     Kategori
+
                                     "{{ request('search') }}"
+
                                     tidak ditemukan.
 
                                 @else
@@ -269,6 +317,7 @@
 @endsection
 
 
+
 {{-- =====================================================
     CSS
 ===================================================== --}}
@@ -287,13 +336,14 @@
 
     max-width: 1500px;
 
-    margin: 0 auto;
+    margin: 20px auto 0;
 
-    padding: 85px 44px 45px;
+    padding: 32px 40px 60px;
 
     box-sizing: border-box;
 
 }
+
 
 
 /* =====================================================
@@ -306,13 +356,14 @@
 
     justify-content: space-between;
 
-    align-items: flex-end;
+    align-items: flex-start;
 
     gap: 30px;
 
-    margin-bottom: 28px;
+    margin-bottom: 30px;
 
 }
+
 
 
 .page-heading {
@@ -324,30 +375,51 @@
 }
 
 
+
 .back-link {
 
-    display: inline-block;
+    display: inline-flex;
 
-    margin-bottom: 14px;
+    align-items: center;
 
-    color: #64748b;
+    gap: 8px;
+
+    padding: 9px 16px;
+
+    background: #ffffff;
+
+    border: 1px solid #d8dee8;
+
+    border-radius: 8px;
+
+    color: #315b91;
 
     text-decoration: none;
 
-    font-size: 13px;
+    font-size: 14px;
 
-    font-weight: 500;
+    font-weight: 600;
 
-    transition: 0.2s;
+    margin-bottom: 24px;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+    transition: all 0.15s ease;
 
 }
+
 
 
 .back-link:hover {
 
-    color: #2563eb;
+    background: #f5f8fc;
+
+    border-color: #315b91;
+
+    color: #244a7c;
 
 }
+
 
 
 .page-eyebrow {
@@ -367,6 +439,7 @@
 }
 
 
+
 .page-heading h1 {
 
     margin: 0;
@@ -382,6 +455,7 @@
 }
 
 
+
 .page-heading p {
 
     margin: 8px 0 0;
@@ -395,6 +469,7 @@
 }
 
 
+
 /* =====================================================
    BUTTON TAMBAH
 ===================================================== */
@@ -404,6 +479,7 @@
     flex-shrink: 0;
 
 }
+
 
 
 .add-button {
@@ -435,11 +511,13 @@
 }
 
 
+
 .add-button:hover {
 
     background: #1d4ed8;
 
 }
+
 
 
 .add-button span {
@@ -449,6 +527,7 @@
     line-height: 1;
 
 }
+
 
 
 /* =====================================================
@@ -476,6 +555,7 @@
 }
 
 
+
 .info-left {
 
     display: flex;
@@ -485,6 +565,7 @@
     gap: 10px;
 
 }
+
 
 
 .info-left strong {
@@ -498,6 +579,7 @@
 }
 
 
+
 .info-left span {
 
     color: #64748b;
@@ -507,6 +589,7 @@
 }
 
 
+
 .info-right {
 
     color: #64748b;
@@ -514,6 +597,7 @@
     font-size: 13px;
 
 }
+
 
 
 /* =====================================================
@@ -531,6 +615,7 @@
     overflow: hidden;
 
 }
+
 
 
 /* =====================================================
@@ -554,6 +639,7 @@
 }
 
 
+
 .table-header h3 {
 
     margin: 0;
@@ -567,6 +653,7 @@
 }
 
 
+
 .table-header p {
 
     margin: 5px 0 0;
@@ -576,6 +663,7 @@
     font-size: 13px;
 
 }
+
 
 
 /* =====================================================
@@ -593,6 +681,7 @@
     flex-shrink: 0;
 
 }
+
 
 
 .search-form input {
@@ -618,11 +707,13 @@
 }
 
 
+
 .search-form input:focus {
 
     border-color: #2563eb;
 
 }
+
 
 
 .search-button {
@@ -654,11 +745,13 @@
 }
 
 
+
 .search-button:hover {
 
     background: #1d4ed8;
 
 }
+
 
 
 /* =====================================================
@@ -674,6 +767,7 @@
 }
 
 
+
 table {
 
     width: 100%;
@@ -685,11 +779,13 @@ table {
 }
 
 
+
 thead {
 
     background: #11569c;
 
 }
+
 
 
 th {
@@ -709,6 +805,7 @@ th {
 }
 
 
+
 td {
 
     padding: 16px 18px;
@@ -724,11 +821,13 @@ td {
 }
 
 
+
 tbody tr {
 
-    transition: background 0.15s;
+    transition: *background* 0.15s;
 
 }
+
 
 
 tbody tr:hover {
@@ -736,6 +835,7 @@ tbody tr:hover {
     background: #f8fafc;
 
 }
+
 
 
 /* =====================================================
@@ -755,6 +855,7 @@ tbody tr:hover {
 }
 
 
+
 /* =====================================================
    NAMA KATEGORI
 ===================================================== */
@@ -770,6 +871,7 @@ tbody tr:hover {
 }
 
 
+
 /* =====================================================
    DESKRIPSI
 ===================================================== */
@@ -781,6 +883,7 @@ tbody tr:hover {
     font-size: 14px;
 
 }
+
 
 
 /* =====================================================
@@ -796,6 +899,7 @@ tbody tr:hover {
     gap: 8px;
 
 }
+
 
 
 /* =====================================================
@@ -833,6 +937,7 @@ tbody tr:hover {
 }
 
 
+
 .sub-button:hover {
 
     background: #bfdbfe;
@@ -840,6 +945,7 @@ tbody tr:hover {
     transform: translateY(-1px);
 
 }
+
 
 
 /* =====================================================
@@ -873,6 +979,7 @@ tbody tr:hover {
 }
 
 
+
 .edit-button:hover {
 
     background: #fde68a;
@@ -880,6 +987,7 @@ tbody tr:hover {
     transform: translateY(-1px);
 
 }
+
 
 
 /* =====================================================
@@ -897,6 +1005,7 @@ tbody tr:hover {
     font-size: 14px;
 
 }
+
 
 
 /* =====================================================
@@ -928,6 +1037,7 @@ tbody tr:hover {
 }
 
 
+
 /* =====================================================
    RESPONSIVE
 ===================================================== */
@@ -941,6 +1051,7 @@ tbody tr:hover {
     }
 
 
+
     .page-top {
 
         flex-direction: column;
@@ -950,6 +1061,7 @@ tbody tr:hover {
     }
 
 
+
     .page-action {
 
         width: 100%;
@@ -957,11 +1069,13 @@ tbody tr:hover {
     }
 
 
+
     .add-button {
 
         width: 100%;
 
     }
+
 
 
     .table-header {
@@ -973,11 +1087,13 @@ tbody tr:hover {
     }
 
 
+
     .search-form {
 
         width: 100%;
 
     }
+
 
 
     .search-form input {
@@ -989,6 +1105,7 @@ tbody tr:hover {
     }
 
 
+
     .data-info {
 
         gap: 10px;
@@ -998,6 +1115,7 @@ tbody tr:hover {
 }
 
 
+
 @media (max-width: 600px) {
 
     .page-section {
@@ -1005,6 +1123,7 @@ tbody tr:hover {
         padding: 65px 15px 35px;
 
     }
+
 
 
     .data-info {
@@ -1018,6 +1137,7 @@ tbody tr:hover {
     }
 
 
+
     .info-right {
 
         display: none;
@@ -1025,7 +1145,9 @@ tbody tr:hover {
     }
 
 
+
     th,
+
     td {
 
         padding: 13px 12px;

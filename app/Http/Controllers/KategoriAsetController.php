@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\KategoriAset;
 use App\Models\SubKategoriAset;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class KategoriAsetController extends Controller
 {
@@ -14,29 +16,64 @@ class KategoriAsetController extends Controller
 
     public function index(Request $request)
     {
-        // Query kategori
+        /*
+         * FR-AM-KAT-001
+         * BR-AM-KAT-001 s.d. BR-AM-KAT-003
+         * VR-AM-KAT-001 s.d. VR-AM-KAT-002
+         *
+         * Data kategori diambil langsung dari database.
+         */
+
         $query = KategoriAset::query();
 
-        // Pencarian berdasarkan nama kategori
+        /*
+         * FR-AM-KAT-004
+         * BR-AM-KAT-009 s.d. BR-AM-KAT-0010
+         * VR-AM-KAT-009 s.d. VR-AM-KAT-010
+         *
+         * Search berdasarkan data kategori yang tersimpan.
+         */
         if ($request->filled('search')) {
-            $query->where(
-                'nama_kategori',
-                'like',
-                '%' . $request->search . '%'
-            );
+            $search = trim($request->input('search'));
+
+            /*
+             * VR-AM-KAT-009
+             * Kata kunci digunakan sebagai nilai pencarian,
+             * bukan sebagai bagian dari query SQL.
+             *
+             * VR-AM-KAT-010
+             * Batas panjang kata kunci maksimal 100 karakter.
+             */
+            if (mb_strlen($search) > 100) {
+                $search = mb_substr($search, 0, 100);
+            }
+
+            if ($search !== '') {
+                $query->where(
+                    'nama_kategori',
+                    'like',
+                    '%' . $search . '%'
+                );
+            }
         }
 
-        // Ambil data kategori
         $kategori = $query->get();
 
-        // Ambil semua sub kategori
+        /*
+         * Tetap mengambil Subkategori karena digunakan
+         * pada tampilan halaman kategori.
+         */
         $subKategori = SubKategoriAset::all();
 
         return view(
             'kategori.index',
-            compact('kategori', 'subKategori')
+            compact(
+                'kategori',
+                'subKategori'
+            )
         );
     }
+
 
     // =====================================================
     // FORM TAMBAH KATEGORI
@@ -44,6 +81,11 @@ class KategoriAsetController extends Controller
 
     public function create()
     {
+        /*
+         * Kode kategori dibuat oleh sistem.
+         * Admin tidak menentukan kode secara manual.
+         */
+
         $nomorTerakhir = KategoriAset::all()
             ->map(function ($item) {
                 return (int) str_replace(
@@ -67,17 +109,81 @@ class KategoriAsetController extends Controller
         );
     }
 
+
     // =====================================================
     // MENYIMPAN KATEGORI BARU
     // =====================================================
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_kategori' => 'required|string|max:100|unique:kategori_aset,nama_kategori',
-            'deskripsi' => 'nullable|string',
-        ]);
+        /*
+         * VR-AM-KAT-011
+         *
+         * Proses penambahan hanya boleh dilakukan
+         * oleh Admin yang telah terautentikasi.
+         *
+         * Pemeriksaan utama tetap dilakukan oleh
+         * middleware Asset Management.
+         */
+        if (!$request->session()->get('asset_management_authenticated')) {
+            return redirect()->route('auth.login');
+        }
 
+        /*
+         * Ambil dan bersihkan nama kategori terlebih dahulu.
+         *
+         * VR-AM-KAT-004
+         * Tidak boleh kosong.
+         *
+         * VR-AM-KAT-005
+         * Nama kategori harus unik.
+         */
+        $namaKategori = trim(
+            $request->input('nama_kategori', '')
+        );
+
+        $validator = Validator::make(
+            [
+                'nama_kategori' => $namaKategori,
+                'deskripsi' => $request->input('deskripsi'),
+            ],
+            [
+                'nama_kategori' => [
+                    'required',
+                    'string',
+                    'min:3',
+                    'max:100',
+                    Rule::unique(
+                        'kategori_aset',
+                        'nama_kategori'
+                    ),
+                    function ($attribute, $value, $fail) {
+                        /*
+                         * VR-AM-KAT-004
+                         *
+                         * Nama tidak boleh hanya terdiri
+                         * dari simbol atau karakter khusus.
+                         */
+                        if (!preg_match('/[A-Za-z0-9]/', $value)) {
+                            $fail(
+                                'Nama kategori harus memiliki karakter yang bermakna.'
+                            );
+                        }
+                    },
+                ],
+                'deskripsi' => [
+                    'nullable',
+                    'string',
+                ],
+            ]
+        );
+
+        $validator->validate();
+
+        /*
+         * Generate ID kategori di sisi server.
+         * Admin tidak menentukan ID kategori.
+         */
         $nomorTerakhir = KategoriAset::all()
             ->map(function ($item) {
                 return (int) str_replace(
@@ -95,16 +201,23 @@ class KategoriAsetController extends Controller
             STR_PAD_LEFT
         );
 
+        /*
+         * Simpan kategori yang sudah lolos validasi.
+         */
         KategoriAset::create([
             'id_kategori' => $idKategori,
-            'nama_kategori' => $request->nama_kategori,
-            'deskripsi' => $request->deskripsi,
+            'nama_kategori' => $namaKategori,
+            'deskripsi' => $request->input('deskripsi'),
         ]);
 
         return redirect()
             ->route('kategori.index')
-            ->with('success', 'Kategori berhasil ditambahkan.');
+            ->with(
+                'success',
+                'Kategori berhasil ditambahkan.'
+            );
     }
+
 
     // =====================================================
     // MENAMPILKAN DETAIL KATEGORI
@@ -112,8 +225,16 @@ class KategoriAsetController extends Controller
 
     public function show($id)
     {
+        /*
+         * Pastikan kategori memang tersedia
+         * pada database.
+         */
         $kategori = KategoriAset::findOrFail($id);
 
+        /*
+         * Menampilkan Subkategori yang memiliki
+         * kategori tersebut sebagai induk.
+         */
         $subKategori = SubKategoriAset::where(
             'id_kategori',
             $kategori->id_kategori
@@ -121,9 +242,13 @@ class KategoriAsetController extends Controller
 
         return view(
             'kategori.show',
-            compact('kategori', 'subKategori')
+            compact(
+                'kategori',
+                'subKategori'
+            )
         );
     }
+
 
     // =====================================================
     // FORM UBAH KATEGORI
@@ -131,6 +256,12 @@ class KategoriAsetController extends Controller
 
     public function edit($id)
     {
+        /*
+         * Pastikan data yang akan diubah tersedia
+         * pada database.
+         *
+         * VR-AM-KAT-007
+         */
         $kategori = KategoriAset::findOrFail($id);
 
         return view(
@@ -139,26 +270,103 @@ class KategoriAsetController extends Controller
         );
     }
 
+
     // =====================================================
     // UPDATE / MENGUBAH KATEGORI
     // =====================================================
 
     public function update(Request $request, $id)
     {
+        /*
+         * VR-AM-KAT-011
+         *
+         * Proses perubahan hanya boleh dilakukan
+         * oleh Admin yang telah terautentikasi.
+         */
+        if (!$request->session()->get('asset_management_authenticated')) {
+            return redirect()->route('auth.login');
+        }
+
+        /*
+         * VR-AM-KAT-007
+         *
+         * Pastikan kategori yang akan diubah
+         * benar-benar tersedia di database.
+         */
         $kategori = KategoriAset::findOrFail($id);
 
-        $request->validate([
-            'nama_kategori' => 'required|string|max:100|unique:kategori_aset,nama_kategori,' . $id . ',id_kategori',
-            'deskripsi' => 'nullable|string',
-        ]);
+        /*
+         * Bersihkan input terlebih dahulu.
+         *
+         * VR-AM-KAT-006
+         * Data hasil perubahan harus divalidasi.
+         */
+        $namaKategori = trim(
+            $request->input('nama_kategori', '')
+        );
 
+        $validator = Validator::make(
+            [
+                'nama_kategori' => $namaKategori,
+                'deskripsi' => $request->input('deskripsi'),
+            ],
+            [
+                'nama_kategori' => [
+                    'required',
+                    'string',
+                    'min:3',
+                    'max:100',
+
+                    /*
+                     * VR-AM-KAT-005
+                     *
+                     * Nama kategori harus unik,
+                     * tetapi kategori yang sedang diedit
+                     * tidak dianggap sebagai duplikat.
+                     */
+                    Rule::unique(
+                        'kategori_aset',
+                        'nama_kategori'
+                    )->ignore(
+                        $kategori->id_kategori,
+                        'id_kategori'
+                    ),
+
+                    function ($attribute, $value, $fail) {
+                        /*
+                         * Nama tidak boleh hanya berisi
+                         * simbol/karakter khusus.
+                         */
+                        if (!preg_match('/[A-Za-z0-9]/', $value)) {
+                            $fail(
+                                'Nama kategori harus memiliki karakter yang bermakna.'
+                            );
+                        }
+                    },
+                ],
+                'deskripsi' => [
+                    'nullable',
+                    'string',
+                ],
+            ]
+        );
+
+        $validator->validate();
+
+        /*
+         * Hanya data yang diperbolehkan yang diubah.
+         * ID kategori tetap.
+         */
         $kategori->update([
-            'nama_kategori' => $request->nama_kategori,
-            'deskripsi' => $request->deskripsi,
+            'nama_kategori' => $namaKategori,
+            'deskripsi' => $request->input('deskripsi'),
         ]);
 
         return redirect()
             ->route('kategori.index')
-            ->with('success', 'Kategori berhasil diubah.');
+            ->with(
+                'success',
+                'Kategori berhasil diubah.'
+            );
     }
 }

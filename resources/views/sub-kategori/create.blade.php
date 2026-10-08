@@ -47,13 +47,6 @@
 
             @csrf
 
-            {{-- PENTING: ID KATEGORI --}}
-            <input
-                type="hidden"
-                name="id_kategori"
-                value="{{ $kategori->id_kategori }}"
-            >
-
 
             {{-- ID SUB KATEGORI --}}
             <div class="form-group">
@@ -72,7 +65,7 @@
             </div>
 
 
-            {{-- KATEGORI --}}
+            {{-- KATEGORI INDUK --}}
             <div class="form-group">
 
                 <label for="kategori">
@@ -218,7 +211,8 @@
 
     margin: 0 auto;
 
-    padding: 125px 30px 60px;
+    /* dibuat tidak tenggelam di bawah header */
+    padding: 50px 30px 60px;
 
     box-sizing: border-box;
 }
@@ -270,6 +264,8 @@
     color: #2563eb;
 
     border-color: #2563eb;
+
+    background: #f8fafc;
 }
 
 
@@ -504,6 +500,8 @@
     background: #f1f5f9;
 
     color: #475569;
+
+    border: 1px solid #e2e8f0;
 }
 
 .cancel-button:hover {
@@ -534,7 +532,7 @@
 
     .create-page {
 
-        padding: 100px 20px 40px;
+        padding: 40px 20px 40px;
     }
 
     .form-card {

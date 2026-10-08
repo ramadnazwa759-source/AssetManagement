@@ -165,7 +165,7 @@
             {{-- FORM LOGIN --}}
             <form
                 class="login-form"
-                action="{{ route('login.process') }}"
+                action="{{ route('auth.authenticate') }}"
                 method="POST"
             >
 
@@ -270,6 +270,7 @@
                             type="password"
                             placeholder="Masukkan password"
                             autocomplete="current-password"
+                            minlength="8"
                             required
                         >
 

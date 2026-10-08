@@ -24,7 +24,7 @@ $masterData = [
         'title' => 'Lokasi Aset',
         'description' => 'Kelola lokasi penyimpanan aset',
         'icon' => '⌖',
-        'link' => '#',
+        'link' => route('lokasi.index'),
     ],
 
     [

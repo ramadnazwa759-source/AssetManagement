@@ -8,6 +8,7 @@ use App\Http\Controllers\AsetController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\KategoriAsetController;
 use App\Http\Controllers\SubKategoriAsetController;
+use App\Http\Controllers\LokasiAsetController;
 
 
 // ROUTE FIKS
@@ -80,6 +81,28 @@ Route::middleware('asset.auth')->group(function () {
         '/kategori/{id_kategori}/sub-kategori/{id}',
         [SubKategoriAsetController::class, 'update']
     )->name('kategori.sub-kategori.update');
+
+    // Lokasi Aset
+    Route::get('/lokasi', [LokasiAsetController::class, 'index'])
+        ->name('lokasi.index');
+
+    Route::get('/lokasi/tambah', [LokasiAsetController::class, 'create'])
+        ->name('lokasi.create');
+
+    Route::post('/lokasi', [LokasiAsetController::class, 'store'])
+        ->name('lokasi.store');
+
+    Route::get('/lokasi/{id}', [LokasiAsetController::class, 'show'])
+        ->name('lokasi.show');
+
+    Route::get('/lokasi/{id}/ubah', [LokasiAsetController::class, 'edit'])
+        ->name('lokasi.edit');
+
+    Route::put('/lokasi/{id}', [LokasiAsetController::class, 'update'])
+        ->name('lokasi.update');
+
+    Route::delete('/lokasi/{id}', [LokasiAsetController::class, 'destroy'])
+        ->name('lokasi.destroy');
 });
 
 
@@ -164,24 +187,5 @@ Route::patch('/jenis-aset/{id}/status', [JenisAsetController::class, 'ubahStatus
 Route::get('/jenis-aset/{id}', [JenisAsetController::class, 'show'])
     ->name('jenis-aset.show');
 
-// LOKASI ASET
-Route::get('/lokasi', [LokasiAsetController::class, 'index'])
-    ->name('lokasi.index');
 
-Route::get('/lokasi/create', [LokasiAsetController::class, 'create'])
-    ->name('lokasi.create');
-
-Route::post('/lokasi', [LokasiAsetController::class, 'store'])
-    ->name('lokasi.store');
-
-// Edit hanya deskripsi
-Route::get('/lokasi/{id}/edit', [LokasiAsetController::class, 'edit'])
-    ->name('lokasi.edit');
-
-Route::put('/lokasi/{id}', [LokasiAsetController::class, 'update'])
-    ->name('lokasi.update');
-
-// Detail lokasi
-Route::get('/lokasi/{id}', [LokasiAsetController::class, 'show'])
-    ->name('lokasi.show');
     

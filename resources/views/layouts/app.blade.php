@@ -15,13 +15,19 @@
     ])
 
     @stack('styles')
+
+    <style>
+        .asset-main {
+            padding-top: 80px;
+        }
+    </style>
 </head>
 
 <body class="@yield('body-class', 'asset-page')">
 
     @include('components.navbar')
 
-    <main>
+    <main class="asset-main">
         @yield('content')
     </main>
 

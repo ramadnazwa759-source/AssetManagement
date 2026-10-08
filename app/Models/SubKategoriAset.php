@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\KategoriAset;
+use App\Models\JenisAset;
 
 class SubKategoriAset extends Model
 {
@@ -22,13 +24,21 @@ class SubKategoriAset extends Model
         'deskripsi',
     ];
 
-
     public function kategori()
     {
         return $this->belongsTo(
             KategoriAset::class,
             'id_kategori',
             'id_kategori'
+        );
+    }
+
+    public function jenisAset()
+    {
+        return $this->hasMany(
+            JenisAset::class,
+            'id_sub_kategori_aset',
+            'id_sub_kategori'
         );
     }
 }

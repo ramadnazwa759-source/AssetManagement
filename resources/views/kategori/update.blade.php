@@ -9,7 +9,7 @@
 
         <div class="header-left">
 
-            <a href="{{ route('kategori.index') }}" class="back-button">
+            <a href="{{ route('lokasi.index') }}" class="back-button">
                 ←
             </a>
 
@@ -20,11 +20,11 @@
                 </span>
 
                 <h1>
-                    Ubah Kategori Aset
+                    Update Lokasi Aset
                 </h1>
 
                 <p>
-                    Perbarui informasi kategori aset yang sudah terdaftar.
+                    Perbarui deskripsi lokasi aset
                 </p>
 
             </div>
@@ -38,7 +38,7 @@
     <div class="form-card">
 
         <form
-            action="{{ route('kategori.update', $kategori->id_kategori) }}"
+            action="{{ route('lokasi.update', $lokasi->id_lokasi) }}"
             method="POST"
         >
 
@@ -46,46 +46,36 @@
             @method('PUT')
 
 
-            {{-- ID KATEGORI --}}
+            {{-- ID LOKASI --}}
             <div class="form-group">
 
-                <label for="id_kategori">
-                    ID Kategori
+                <label for="id_lokasi">
+                    ID Lokasi
                 </label>
 
                 <input
                     type="text"
-                    id="id_kategori"
-                    name="id_kategori"
-                    value="{{ $kategori->id_kategori }}"
+                    id="id_lokasi"
+                    value="{{ $lokasi->id_lokasi }}"
                     readonly
                 >
 
             </div>
 
 
-            {{-- NAMA KATEGORI --}}
+            {{-- NAMA LOKASI --}}
             <div class="form-group">
 
-                <label for="nama_kategori">
-                    Nama Kategori
-                    <span>*</span>
+                <label for="nama_lokasi">
+                    Nama Lokasi
                 </label>
 
                 <input
                     type="text"
-                    id="nama_kategori"
-                    name="nama_kategori"
-                    value="{{ old('nama_kategori', $kategori->nama_kategori) }}"
-                    placeholder="Masukkan nama kategori"
-                    required
+                    id="nama_lokasi"
+                    value="{{ $lokasi->nama_lokasi }}"
+                    readonly
                 >
-
-                @error('nama_kategori')
-                    <small class="input-error">
-                        {{ $message }}
-                    </small>
-                @enderror
 
             </div>
 
@@ -101,8 +91,8 @@
                     id="deskripsi"
                     name="deskripsi"
                     rows="5"
-                    placeholder="Masukkan deskripsi kategori..."
-                >{{ old('deskripsi', $kategori->deskripsi) }}</textarea>
+                    placeholder="Masukkan deskripsi lokasi..."
+                >{{ old('deskripsi', $lokasi->deskripsi) }}</textarea>
 
                 @error('deskripsi')
                     <small class="input-error">
@@ -118,8 +108,9 @@
 
                 <strong>Catatan:</strong>
 
-                Pastikan perubahan data kategori sudah sesuai
-                sebelum menyimpan.
+                ID dan nama lokasi merupakan identitas tetap
+                sehingga tidak dapat diubah. Perubahan hanya
+                dilakukan pada deskripsi lokasi.
 
             </div>
 
@@ -128,7 +119,7 @@
             <div class="form-actions">
 
                 <a
-                    href="{{ route('kategori.index') }}"
+                    href="{{ route('lokasi.index') }}"
                     class="cancel-button"
                 >
                     Batal
@@ -153,6 +144,7 @@
 
 
 @push('styles')
+
 <style>
 
 /* =====================================================
@@ -162,15 +154,12 @@
 .create-page {
 
     width: 100%;
+
     max-width: 1000px;
 
     margin: 0 auto;
 
-    /*
-     * Jarak atas dibuat lebih besar
-     * supaya tidak tertutup navbar
-     */
-    padding: 125px 30px 60px;
+    padding: 65px 30px 60px;
 
     box-sizing: border-box;
 }
@@ -181,10 +170,12 @@
 ===================================================== */
 
 .page-header {
+
     margin-bottom: 28px;
 }
 
 .header-left {
+
     display: flex;
 
     align-items: flex-start;
@@ -311,11 +302,6 @@
     font-size: 14px;
 
     font-weight: 600;
-}
-
-.form-group label span {
-
-    color: #dc2626;
 }
 
 .form-group input,
@@ -501,4 +487,5 @@
 }
 
 </style>
+
 @endpush

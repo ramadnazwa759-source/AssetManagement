@@ -5,36 +5,100 @@ namespace App\Http\Controllers;
 use App\Models\KategoriAset;
 use App\Models\SubKategoriAset;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class KategoriAsetController extends Controller
 {
-    // Menampilkan semua kategori
-   public function index()
-{
-    $kategori = KategoriAset::all();
-    $subKategori = SubKategoriAset::all();
+    // =====================================================
+    // MENAMPILKAN SEMUA KATEGORI + SEARCH
+    // =====================================================
 
-    return view('kategori.index', compact('kategori', 'subKategori'));
-}
-    // Menampilkan form tambah kategori
-    public function create()
+    public function index(Request $request)
     {
-        return view('kategori.create');
+        // Query kategori
+        $query = KategoriAset::query();
+
+        // Pencarian berdasarkan nama kategori
+        if ($request->filled('search')) {
+            $query->where(
+                'nama_kategori',
+                'like',
+                '%' . $request->search . '%'
+            );
+        }
+
+        // Ambil data kategori
+        $kategori = $query->get();
+
+        // Ambil semua sub kategori
+        $subKategori = SubKategoriAset::all();
+
+        return view(
+            'kategori.index',
+            compact('kategori', 'subKategori')
+        );
     }
 
-    // Menyimpan kategori baru
+    // =====================================================
+    // FORM TAMBAH KATEGORI
+    // =====================================================
+
+    public function create()
+    {
+        $nomorTerakhir = KategoriAset::all()
+            ->map(function ($item) {
+                return (int) str_replace(
+                    'KAT-',
+                    '',
+                    $item->id_kategori
+                );
+            })
+            ->max() ?? 0;
+
+        $idKategoriBaru = 'KAT-' . str_pad(
+            $nomorTerakhir + 1,
+            2,
+            '0',
+            STR_PAD_LEFT
+        );
+
+        return view(
+            'kategori.create',
+            compact('idKategoriBaru')
+        );
+    }
+
+    // =====================================================
+    // MENYIMPAN KATEGORI BARU
+    // =====================================================
+
     public function store(Request $request)
     {
         $request->validate([
             'nama_kategori' => 'required|string|max:100|unique:kategori_aset,nama_kategori',
-            'Deskripsi' => 'nullable|string',
+            'deskripsi' => 'nullable|string',
         ]);
 
+        $nomorTerakhir = KategoriAset::all()
+            ->map(function ($item) {
+                return (int) str_replace(
+                    'KAT-',
+                    '',
+                    $item->id_kategori
+                );
+            })
+            ->max() ?? 0;
+
+        $idKategori = 'KAT-' . str_pad(
+            $nomorTerakhir + 1,
+            2,
+            '0',
+            STR_PAD_LEFT
+        );
+
         KategoriAset::create([
-            'id_kategori' => 'KAT-' . strtoupper(Str::random(6)),
+            'id_kategori' => $idKategori,
             'nama_kategori' => $request->nama_kategori,
-            'Deskripsi' => $request->Deskripsi,
+            'deskripsi' => $request->deskripsi,
         ]);
 
         return redirect()
@@ -42,43 +106,59 @@ class KategoriAsetController extends Controller
             ->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-    // Menampilkan form edit kategori
+    // =====================================================
+    // MENAMPILKAN DETAIL KATEGORI
+    // =====================================================
+
+    public function show($id)
+    {
+        $kategori = KategoriAset::findOrFail($id);
+
+        $subKategori = SubKategoriAset::where(
+            'id_kategori',
+            $kategori->id_kategori
+        )->get();
+
+        return view(
+            'kategori.show',
+            compact('kategori', 'subKategori')
+        );
+    }
+
+    // =====================================================
+    // FORM UBAH KATEGORI
+    // =====================================================
+
     public function edit($id)
     {
         $kategori = KategoriAset::findOrFail($id);
 
-        return view('kategori.edit', compact('kategori'));
+        return view(
+            'kategori.update',
+            compact('kategori')
+        );
     }
 
-    // Mengubah kategori
+    // =====================================================
+    // UPDATE / MENGUBAH KATEGORI
+    // =====================================================
+
     public function update(Request $request, $id)
     {
         $kategori = KategoriAset::findOrFail($id);
 
         $request->validate([
             'nama_kategori' => 'required|string|max:100|unique:kategori_aset,nama_kategori,' . $id . ',id_kategori',
-            'Deskripsi' => 'nullable|string',
+            'deskripsi' => 'nullable|string',
         ]);
 
         $kategori->update([
             'nama_kategori' => $request->nama_kategori,
-            'Deskripsi' => $request->Deskripsi,
+            'deskripsi' => $request->deskripsi,
         ]);
 
         return redirect()
             ->route('kategori.index')
             ->with('success', 'Kategori berhasil diubah.');
-    }
-
-    // Menghapus kategori
-    public function destroy($id)
-    {
-        $kategori = KategoriAset::findOrFail($id);
-
-        $kategori->delete();
-
-        return redirect()
-            ->route('kategori.index')
-            ->with('success', 'Kategori berhasil dihapus.');
     }
 }

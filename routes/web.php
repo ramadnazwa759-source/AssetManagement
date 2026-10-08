@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisAsetController;
 use App\Http\Controllers\AsetController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\KategoriAsetController;
+use App\Http\Controllers\SubKategoriAsetController;
 
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -23,12 +26,6 @@ Route::get('/aset', [AsetController::class, 'index'])->name('aset.index');
 Route::get('/aset/{id}', [AsetController::class, 'show'])->name('aset.show');
 Route::get('/aset/{id}/edit', [AsetController::class, 'edit'])->name('aset.edit');
 Route::put('/aset/{id}', [AsetController::class, 'update'])->name('aset.update');
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\KategoriAsetController;
-use App\Http\Controllers\SubKategoriAsetController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\JenisAsetController;
-
 
 // =====================================================
 // LOGIN

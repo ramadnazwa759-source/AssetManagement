@@ -59,7 +59,7 @@
                 <h3>Daftar Data Aset</h3>
                 <p>
                     Daftar unit aset beserta jenis, lokasi, kondisi,
-                    dan statusnya.
+                    status, dan waktu penambahan stoknya.
                 </p>
             </div>
 
@@ -196,6 +196,7 @@
                         <th>Jenis Aset</th>
                         <th>Lokasi</th>
                         <th>Tanggal Beli</th>
+                        <th>Waktu Penambahan Stok</th>
                         <th>Kondisi</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -230,6 +231,13 @@
                             <td>
                                 {{ $item->tanggal_beli
                                     ? $item->tanggal_beli->format('d-m-Y')
+                                    : '-' }}
+                            </td>
+
+                            {{-- WAKTU PENAMBAHAN STOK --}}
+                            <td class="stock-date">
+                                {{ $item->created_at
+                                    ? $item->created_at->format('d-m-Y H:i')
                                     : '-' }}
                             </td>
 
@@ -288,7 +296,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="empty-data">
+                            <td colspan="10" class="empty-data">
                                 @if (
                                     collect(request()->only([
                                         'search',
@@ -662,6 +670,13 @@ tbody tr:hover {
     font-weight: 600;
 }
 
+.stock-date {
+    min-width: 145px;
+    white-space: nowrap;
+    color: #475569;
+    font-size: 12px;
+}
+
 .condition-badge,
 .status-badge {
     display: inline-flex;
@@ -925,7 +940,7 @@ tbody tr:hover {
     }
 
     table {
-        min-width: 950px;
+        min-width: 1100px;
     }
 
     th,

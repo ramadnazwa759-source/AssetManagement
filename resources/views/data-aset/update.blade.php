@@ -31,6 +31,12 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        <div class="alert alert-error">
+            Terdapat data yang belum sesuai. Silakan periksa kembali form.
+        </div>
+    @endif
+
     {{-- FORM --}}
     <div class="form-card">
 
@@ -140,34 +146,82 @@
 
             {{-- KONDISI ASET --}}
             <div class="form-group">
-                <label for="kondisi_aset">Kondisi Aset</label>
+                <label for="kondisi_aset">
+                    Kondisi Aset <span>*</span>
+                </label>
 
-                <input
-                    type="text"
+                <select
                     id="kondisi_aset"
-                    value="{{ $aset->kondisi_aset }}"
-                    readonly
+                    name="kondisi_aset"
+                    required
+                    {{ $aset->status_aset === 'Dipinjam' ? 'disabled' : '' }}
                 >
+                    @foreach ($kondisiOptions as $kondisi)
+                        <option
+                            value="{{ $kondisi }}"
+                            {{ old('kondisi_aset', $aset->kondisi_aset) === $kondisi ? 'selected' : '' }}
+                        >
+                            {{ $kondisi }}
+                        </option>
+                    @endforeach
+                </select>
 
-                <small>
-                    Kondisi aset tidak diubah melalui halaman edit ini.
-                </small>
+                @if ($aset->status_aset === 'Dipinjam')
+                    <small class="field-warning">
+                        Kondisi tidak dapat diubah karena aset sedang dipinjam. Kondisi akan diperbarui saat proses pengembalian.
+                    </small>
+                @else
+                    @error('kondisi_aset')
+                        <small class="input-error">{{ $message }}</small>
+                    @else
+                        <small>
+                            Kondisi aset dapat diperbarui secara manual berdasarkan hasil pemeriksaan.
+                        </small>
+                    @enderror
+                @endif
             </div>
 
             {{-- STATUS ASET --}}
             <div class="form-group">
-                <label for="status_aset">Status Aset</label>
+                <label for="status_aset">
+                    Status Aset <span>*</span>
+                </label>
 
-                <input
-                    type="text"
+                <select
                     id="status_aset"
-                    value="{{ $aset->status_aset }}"
-                    readonly
+                    name="status_aset"
+                    required
+                    {{ $aset->status_aset === 'Dipinjam' ? 'disabled' : '' }}
                 >
+                    @if ($aset->status_aset === 'Dipinjam')
+                        <option value="Dipinjam" selected>
+                            Dipinjam
+                        </option>
+                    @endif
 
-                <small>
-                    Status aset dikelola melalui fitur perubahan status atau proses transaksi yang sesuai.
-                </small>
+                    @foreach ($statusOptions as $status)
+                        <option
+                            value="{{ $status }}"
+                            {{ old('status_aset', $aset->status_aset) === $status ? 'selected' : '' }}
+                        >
+                            {{ $status }}
+                        </option>
+                    @endforeach
+                </select>
+
+                @if ($aset->status_aset === 'Dipinjam')
+                    <small class="field-warning">
+                        Status tidak dapat diubah secara manual selama aset dipinjam. Status akan diperbarui melalui proses pengembalian.
+                    </small>
+                @else
+                    @error('status_aset')
+                        <small class="input-error">{{ $message }}</small>
+                    @else
+                        <small>
+                            Pilih Tersedia untuk aset berkondisi Baik, Perlu Perbaikan untuk aset rusak, atau Nonaktif jika aset tidak digunakan.
+                        </small>
+                    @enderror
+                @endif
             </div>
 
             {{-- GAMBAR ASET --}}
@@ -225,9 +279,11 @@
             <div class="form-note">
                 <strong>Catatan:</strong>
 
-                Perubahan melalui halaman ini hanya berlaku untuk lokasi,
-                tanggal beli, gambar, dan keterangan. Kode aset, jenis aset,
-                kondisi, serta status tidak dapat diubah melalui form ini.
+                Admin dapat memperbarui lokasi, tanggal beli, kondisi,
+                status, gambar, dan keterangan aset. Namun, kondisi dan
+                status aset yang sedang dipinjam hanya dapat diperbarui
+                melalui proses pengembalian. Status Dipinjam juga hanya
+                ditetapkan melalui proses peminjaman.
             </div>
 
             {{-- BUTTON --}}
@@ -253,6 +309,7 @@
 
 @push('styles')
 <style>
+
 /* PAGE */
 .create-page {
     width: 100%;
@@ -395,10 +452,12 @@
     color: #94a3b8;
 }
 
-.form-group input[readonly] {
+.form-group input[readonly],
+.form-group select:disabled {
     background: #f8fafc;
     color: #64748b;
     cursor: not-allowed;
+    opacity: 1;
 }
 
 .form-group input[type="file"] {
@@ -426,6 +485,11 @@
     margin-top: 6px;
     color: #dc2626 !important;
     font-size: 12px !important;
+}
+
+/* WARNING */
+.field-warning {
+    color: #b45309 !important;
 }
 
 /* CURRENT IMAGE */
@@ -528,5 +592,6 @@
         box-sizing: border-box;
     }
 }
+
 </style>
 @endpush

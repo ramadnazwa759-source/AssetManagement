@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Aset extends Model
 {
@@ -30,8 +31,7 @@ class Aset extends Model
         'tanggal_beli' => 'date',
     ];
 
-    // Relasi ke jenis aset
-    public function jenis()
+    public function jenis(): BelongsTo
     {
         return $this->belongsTo(
             JenisAset::class,
@@ -40,8 +40,7 @@ class Aset extends Model
         );
     }
 
-    // Relasi ke lokasi aset
-    public function lokasi()
+    public function lokasi(): BelongsTo
     {
         return $this->belongsTo(
             LokasiAset::class,

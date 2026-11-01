@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0d4f8b">
 
-```
 <title>Login Admin | Kalisawah Asset Management</title>
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -23,13 +22,12 @@
         line-height: 1.5;
     }
 </style>
-```
+
 
 </head>
 
 <body class="login-page">
 
-```
 <main class="login-shell">
 
     {{-- =========================
@@ -446,7 +444,6 @@
     }
 
 </script>
-```
 
 </body>
 </html>

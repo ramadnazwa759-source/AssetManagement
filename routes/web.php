@@ -103,89 +103,46 @@ Route::middleware('asset.auth')->group(function () {
 
     Route::delete('/lokasi/{id}', [LokasiAsetController::class, 'destroy'])
         ->name('lokasi.destroy');
-});
 
+    // Jenis Aset
+    
+    Route::get('/jenis-aset', [JenisAsetController::class, 'index'])
+        ->name('jenis-aset.index');
 
+    Route::get('/jenis-aset/tambah', [JenisAsetController::class, 'create'])
+        ->name('jenis-aset.create');
 
-// Jenis Aset
-Route::get('/jenis-aset', [JenisAsetController::class, 'index'])->name('jenis-aset.index');
-Route::get('/jenis-aset/create', [JenisAsetController::class, 'create'])->name('jenis-aset.create');
-Route::post('/jenis-aset', [JenisAsetController::class, 'store'])->name('jenis-aset.store');
-Route::get('/jenis-aset/{id}', [JenisAsetController::class, 'show'])->name('jenis-aset.show');
-Route::get('/jenis-aset/{id}/edit', [JenisAsetController::class, 'edit'])->name('jenis-aset.edit');
-Route::put('/jenis-aset/{id}', [JenisAsetController::class, 'update'])->name('jenis-aset.update');
-Route::patch('/jenis-aset/{id}/status', [JenisAsetController::class, 'ubahStatus'])->name('jenis-aset.status');
+    Route::post('/jenis-aset', [JenisAsetController::class, 'store'])
+        ->name('jenis-aset.store');
 
-// Aset
-Route::get('/aset', [AsetController::class, 'index'])->name('aset.index');
-Route::get('/aset/{id}', [AsetController::class, 'show'])->name('aset.show');
-Route::get('/aset/{id}/edit', [AsetController::class, 'edit'])->name('aset.edit');
-Route::put('/aset/{id}', [AsetController::class, 'update'])->name('aset.update');
+    Route::get('/jenis-aset/{id}/ubah', [JenisAsetController::class, 'edit'])
+        ->name('jenis-aset.edit');
 
+    Route::put('/jenis-aset/{id}', [JenisAsetController::class, 'update'])
+        ->name('jenis-aset.update');
 
+    Route::post('/jenis-aset/{id}/stok', [JenisAsetController::class, 'addStock'])
+        ->name('jenis-aset.stok');
 
-
-
-
-// DASHBOARD
-// =====================================================
-
-
-
-// =====================================================
-// KATEGORI ASET
-// =====================================================
-
-
-
-
-// =====================================================
-// SUB KATEGORI ASET
-// =====================================================
-
-/// SUB KATEGORI
-Route::get('/kategori/{id_kategori}/sub-kategori', [SubKategoriAsetController::class, 'index'])
-    ->name('kategori.sub-kategori.index');
-
-Route::get('/kategori/{id_kategori}/sub-kategori/create', [SubKategoriAsetController::class, 'create'])
-    ->name('kategori.sub-kategori.create');
-
-Route::post('/kategori/{id_kategori}/sub-kategori', [SubKategoriAsetController::class, 'store'])
-    ->name('kategori.sub-kategori.store');
-
-Route::get('/kategori/{id_kategori}/sub-kategori/{id}/update', [SubKategoriAsetController::class, 'edit'])
-    ->name('kategori.sub-kategori.edit');
-
-Route::put('/kategori/{id_kategori}/sub-kategori/{id}', [SubKategoriAsetController::class, 'update'])
-    ->name('kategori.sub-kategori.update');
-
-Route::delete('/kategori/{id_kategori}/sub-kategori/{id}', [SubKategoriAsetController::class, 'destroy'])
-    ->name('kategori.sub-kategori.destroy');
-
-// =====================================================
-// JENIS ASET
-// =====================================================
-
-Route::get('/jenis-aset', [JenisAsetController::class, 'index'])
-    ->name('jenis-aset.index');
-
-Route::get('/jenis-aset/tambah', [JenisAsetController::class, 'create'])
-    ->name('jenis-aset.create');
-
-Route::post('/jenis-aset', [JenisAsetController::class, 'store'])
-    ->name('jenis-aset.store');
-
-Route::get('/jenis-aset/{id}/edit', [JenisAsetController::class, 'edit'])
-    ->name('jenis-aset.edit');
-
-Route::put('/jenis-aset/{id}', [JenisAsetController::class, 'update'])
-    ->name('jenis-aset.update');
-
-Route::patch('/jenis-aset/{id}/status', [JenisAsetController::class, 'ubahStatus'])
-    ->name('jenis-aset.status');
-
-Route::get('/jenis-aset/{id}', [JenisAsetController::class, 'show'])
-    ->name('jenis-aset.show');
-
+    Route::patch('/jenis-aset/{id}/status', [JenisAsetController::class, 'ubahStatus'])
+        ->name('jenis-aset.status');
 
     
+    // Data Aset
+
+    Route::get('/aset', [AsetController::class, 'index'])
+        ->name('aset.index');
+
+    Route::get('/aset/{kode_aset}', [AsetController::class, 'show'])
+        ->name('aset.show');
+
+    Route::get('/aset/{kode_aset}/ubah', [AsetController::class, 'edit'])
+        ->name('aset.edit');
+
+    Route::put('/aset/{kode_aset}', [AsetController::class, 'update'])
+        ->name('aset.update');
+
+    Route::patch('/aset/{kode_aset}/status', [AsetController::class, 'ubahStatus'])
+        ->name('aset.status');
+    
+});

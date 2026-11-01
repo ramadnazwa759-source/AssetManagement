@@ -17,7 +17,7 @@ $masterData = [
         'title' => 'Jenis Aset',
         'description' => 'Kelola jenis dan stok aset',
         'icon' => '▤',
-        'link' => '/jenis-aset',
+        'link' => route('jenis-aset.index'),
     ],
 
     [
@@ -31,7 +31,7 @@ $masterData = [
         'title' => 'Data Aset',
         'description' => 'Lihat dan kelola data aset',
         'icon' => '▣',
-        'link' => '#',
+        'link' => route('aset.index'),
     ],
 
 ];
@@ -62,7 +62,7 @@ $masterData = [
         </p>
 
         <div class="hero-actions">
-            <a href="#" class="primary-button">
+            <a href="{{ route('aset.index') }}" class="primary-button">
                 Kelola Data Aset
                 <span>→</span>
             </a>

@@ -7,43 +7,40 @@ use App\Models\Aset;
 use App\Models\SubKategoriAset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class JenisAsetController extends Controller
 {
     /**
-     * Menampilkan daftar Jenis Aset.
-     *
      * FR-AM-JNS-001
+     * Menampilkan daftar Jenis Aset
+     *
      * FR-AM-JNS-004
+     * Mencari Jenis Aset
      */
     public function index(Request $request)
     {
         $request->validate([
-            'search' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
+            'search' => 'nullable|string|max:100',
         ]);
 
         $search = trim($request->input('search', ''));
 
         $jenis = JenisAset::with('subKategori')
             ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('id_jenis', 'like', "%{$search}%")
-                        ->orWhere('nama_jenis', 'like', "%{$search}%")
-                        ->orWhereHas('subKategori', function ($query) use ($search) {
-                            $query->where(
+                $query->where(function ($q) use ($search) {
+                    $q->where('id_jenis', 'like', '%' . $search . '%')
+                        ->orWhere('nama_jenis', 'like', '%' . $search . '%')
+                        ->orWhere('status_jenis', 'like', '%' . $search . '%')
+                        ->orWhereHas('subKategori', function ($subQuery) use ($search) {
+                            $subQuery->where(
                                 'nama_sub_kategori',
                                 'like',
-                                "%{$search}%"
+                                '%' . $search . '%'
                             );
                         });
                 });
             })
-            ->orderBy('id_jenis', 'desc')
+            ->latest()
             ->get();
 
         return view(
@@ -54,57 +51,65 @@ class JenisAsetController extends Controller
 
 
     /**
-     * Menampilkan form tambah Jenis Aset.
-     *
      * FR-AM-JNS-002
+     * Menampilkan form tambah Jenis Aset
      */
     public function create()
     {
-        $subKategori = SubKategoriAset::orderBy(
-            'nama_sub_kategori'
-        )->get();
+        $subKategori = SubKategoriAset::all();
+
+        /*
+         * Kode Jenis Aset dibuat otomatis oleh sistem.
+         * Admin tidak perlu mengirim id_jenis.
+         */
+        $idJenisBaru = $this->generateKodeJenis();
 
         return view(
             'jenis-aset.create',
-            compact('subKategori')
+            compact('subKategori', 'idJenisBaru')
         );
     }
 
 
     /**
-     * Menyimpan Jenis Aset baru.
-     *
      * FR-AM-JNS-002
-     *
-     * BR:
-     * - Subkategori wajib valid
-     * - Kode dibuat otomatis
-     * - Kode tidak boleh berasal dari input Admin
-     *
-     * VR:
-     * - VR-AM-JNS-001
-     * - VR-AM-JNS-002
-     * - VR-AM-JNS-003
-     * - VR-AM-JNS-004
-     * - VR-AM-JNS-005
+     * Menambahkan Jenis Aset
      */
     public function store(Request $request)
     {
         /*
-         * Jangan menerima id_jenis dari Admin.
-         * Kode Jenis Aset dibuat sepenuhnya oleh server.
+         * VR-AM-JNS-004
+         * Admin tidak boleh menentukan kode jenis secara manual.
          */
+        if ($request->has('id_jenis')) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'id_jenis' => 'Kode Jenis Aset dibuat otomatis oleh sistem.'
+                ]);
+        }
+
+        /*
+         * Trim nama sebelum validasi.
+         * VR-AM-JNS-001
+         * VR-AM-JNS-002
+         */
+        $request->merge([
+            'nama_jenis' => trim($request->input('nama_jenis', '')),
+        ]);
+
         $validated = $request->validate([
             'id_sub_kategori_aset' => [
-                'required',
-                'exists:sub_kategori_aset,id_sub_kategori_aset',
-            ],
+            'required',
+            'exists:sub_kategori_aset,id_sub_kategori',
+        ],
 
             'nama_jenis' => [
                 'required',
                 'string',
                 'min:3',
                 'max:100',
+                'unique:jenis_aset,nama_jenis',
             ],
 
             'stok' => [
@@ -119,52 +124,16 @@ class JenisAsetController extends Controller
             ],
         ]);
 
-        /*
-         * Trim nama sebelum disimpan.
-         */
-        $validated['nama_jenis'] = trim(
-            $validated['nama_jenis']
-        );
-
-        /*
-         * Setelah trim tidak boleh kosong.
-         */
-        if ($validated['nama_jenis'] === '') {
-            return back()
-                ->withErrors([
-                    'nama_jenis' => 'Nama jenis aset wajib diisi.'
-                ])
-                ->withInput();
-        }
-
-        /*
-         * Memastikan nama tidak sama dengan Jenis Aset lain.
-         */
-        $namaSudahAda = JenisAset::where(
-            'nama_jenis',
-            $validated['nama_jenis']
-        )->exists();
-
-        if ($namaSudahAda) {
-            return back()
-                ->withErrors([
-                    'nama_jenis' => 'Nama jenis aset sudah digunakan.'
-                ])
-                ->withInput();
-        }
-
         DB::transaction(function () use ($validated) {
 
             /*
-             * Generate kode Jenis Aset di server.
+             * VR-AM-JNS-005
+             * Kode Jenis Aset dibuat server dan harus unik.
              */
-            $idJenisBaru = $this->generateKodeJenis();
+            $idJenis = $this->generateKodeJenis();
 
-            /*
-             * Simpan Jenis Aset.
-             */
             $jenis = JenisAset::create([
-                'id_jenis' => $idJenisBaru,
+                'id_jenis' => $idJenis,
                 'id_sub_kategori_aset' =>
                     $validated['id_sub_kategori_aset'],
                 'nama_jenis' =>
@@ -178,17 +147,16 @@ class JenisAsetController extends Controller
             ]);
 
             /*
-             * Membuat Unit/Data Aset sesuai stok awal.
+             * Membuat unit aset sesuai stok awal.
+             *
+             * FR-AM-JNS-005 dan BR-AM-JNS-017/018
              */
-            for (
-                $i = 1;
-                $i <= $validated['stok'];
-                $i++
-            ) {
+            for ($i = 1; $i <= $validated['stok']; $i++) {
+
                 Aset::create([
                     'kode_aset' => $this->generateKodeAset(
                         $jenis->nama_jenis,
-                        $i
+                        $jenis->id_jenis
                     ),
 
                     'id_jenis' =>
@@ -222,19 +190,19 @@ class JenisAsetController extends Controller
             ->route('jenis-aset.index')
             ->with(
                 'success',
-                'Jenis aset dan stok berhasil ditambahkan.'
+                'Jenis aset berhasil ditambahkan.'
             );
     }
 
 
     /**
-     * Menampilkan detail Jenis Aset.
+     * Menampilkan detail Jenis Aset
      */
     public function show(string $id)
     {
         $jenis = JenisAset::with([
             'subKategori',
-            'aset',
+            'aset'
         ])->findOrFail($id);
 
         return view(
@@ -245,54 +213,75 @@ class JenisAsetController extends Controller
 
 
     /**
-     * Menampilkan form edit Jenis Aset.
-     *
      * FR-AM-JNS-003
+     * Menampilkan form edit
      */
     public function edit(string $id)
     {
         $jenis = JenisAset::findOrFail($id);
 
-        $subKategori = SubKategoriAset::orderBy(
-            'nama_sub_kategori'
-        )->get();
+        $subKategori = SubKategoriAset::all();
 
         return view(
-            'jenis-aset.edit',
+            'jenis-aset.update',
             compact('jenis', 'subKategori')
         );
     }
 
 
     /**
-     * Mengubah Jenis Aset.
-     *
      * FR-AM-JNS-003
-     *
-     * Kode Jenis Aset tidak dapat diubah.
+     * Mengubah Jenis Aset
      */
     public function update(Request $request, string $id)
     {
         /*
-         * Pastikan ID Jenis Aset benar-benar ada.
+         * VR-AM-JNS-007
          */
-        $jenis = JenisAset::findOrFail($id);
+        $jenis = JenisAset::find($id);
+
+        if (!$jenis) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'jenis' => 'Jenis Aset yang akan diubah tidak ditemukan.'
+                ]);
+        }
 
         /*
-         * Jangan menerima id_jenis sebagai data yang
-         * dapat diperbarui.
+         * VR-AM-JNS-006
+         * Kode tidak boleh diubah.
          */
+        if ($request->has('id_jenis')) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'id_jenis' =>
+                        'Kode Jenis Aset tidak dapat diubah.'
+                ]);
+        }
+
+        /*
+         * VR-AM-JNS-001 dan VR-AM-JNS-002
+         */
+        $request->merge([
+            'nama_jenis' => trim($request->input('nama_jenis', '')),
+        ]);
+
         $validated = $request->validate([
             'id_sub_kategori_aset' => [
-                'required',
-                'exists:sub_kategori_aset,id_sub_kategori_aset',
-            ],
+            'required',
+            'exists:sub_kategori_aset,id_sub_kategori',
+        ],
 
             'nama_jenis' => [
                 'required',
                 'string',
                 'min:3',
                 'max:100',
+                'unique:jenis_aset,nama_jenis,' .
+                $jenis->id_jenis .
+                ',id_jenis',
             ],
 
             'deskripsi' => [
@@ -301,59 +290,10 @@ class JenisAsetController extends Controller
             ],
         ]);
 
-        /*
-         * Trim nama.
-         */
-        $validated['nama_jenis'] = trim(
-            $validated['nama_jenis']
-        );
-
-        /*
-         * Nama setelah trim tidak boleh kosong.
-         */
-        if ($validated['nama_jenis'] === '') {
-            return back()
-                ->withErrors([
-                    'nama_jenis' => 'Nama jenis aset wajib diisi.'
-                ])
-                ->withInput();
-        }
-
-        /*
-         * Cek nama Jenis Aset agar tidak duplikat.
-         * Data milik ID yang sedang diedit dikecualikan.
-         */
-        $namaSudahAda = JenisAset::where(
-            'nama_jenis',
-            $validated['nama_jenis']
-        )
-            ->where(
-                'id_jenis',
-                '!=',
-                $jenis->id_jenis
-            )
-            ->exists();
-
-        if ($namaSudahAda) {
-            return back()
-                ->withErrors([
-                    'nama_jenis' => 'Nama jenis aset sudah digunakan.'
-                ])
-                ->withInput();
-        }
-
-        /*
-         * Kode tidak ikut di-update.
-         */
         $jenis->update([
-            'id_sub_kategori_aset' =>
-                $validated['id_sub_kategori_aset'],
-
-            'nama_jenis' =>
-                $validated['nama_jenis'],
-
-            'deskripsi' =>
-                $validated['deskripsi'] ?? null,
+            'id_sub_kategori_aset' => $validated['id_sub_kategori_aset'],
+            'nama_jenis' => $validated['nama_jenis'],
+            'deskripsi' => $validated['deskripsi'] ?? null,
         ]);
 
         return redirect()
@@ -366,30 +306,27 @@ class JenisAsetController extends Controller
 
 
     /**
-     * Menambahkan stok Jenis Aset.
-     *
      * FR-AM-JNS-005
-     *
-     * BR:
-     * - Hanya Jenis Aset Aktif yang dapat ditambah stok
-     * - Setiap stok menghasilkan satu Unit/Data Aset
-     * - Unit terhubung dengan Jenis Aset
-     *
-     * VR:
-     * - VR-AM-JNS-009
-     * - VR-AM-JNS-010
-     * - VR-AM-JNS-011
-     * - VR-AM-JNS-012
+     * Menambahkan stok Jenis Aset
      */
     public function addStock(Request $request, string $id)
     {
         /*
-         * Pastikan Jenis Aset benar-benar ada.
+         * VR-AM-JNS-010
+         * Status harus dicek langsung dari database.
          */
         $jenis = JenisAset::findOrFail($id);
 
+        if ($jenis->status_jenis === 'Nonaktif') {
+            return back()
+                ->withErrors([
+                    'tambah_stok' =>
+                        'Jenis Aset Nonaktif tidak dapat digunakan untuk menambah stok.'
+                ]);
+        }
+
         /*
-         * Validasi jumlah stok.
+         * VR-AM-JNS-009
          */
         $validated = $request->validate([
             'tambah_stok' => [
@@ -399,67 +336,30 @@ class JenisAsetController extends Controller
             ],
         ]);
 
-        /*
-         * Jenis Aset Nonaktif tidak boleh
-         * digunakan untuk penambahan stok.
-         */
-        if ($jenis->status_jenis !== 'Aktif') {
-            return back()
-                ->with(
-                    'error',
-                    'Stok tidak dapat ditambahkan karena jenis aset sedang nonaktif.'
-                );
-        }
-
-        DB::transaction(function () use (
-            $jenis,
-            $validated
-        ) {
-
-            /*
-             * Ambil stok terbaru dari database.
-             */
-            $jenis = JenisAset::where(
-                'id_jenis',
-                $jenis->id_jenis
-            )
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            /*
-             * Cek kembali status setelah row dikunci.
-             */
-            if ($jenis->status_jenis !== 'Aktif') {
-                throw new \RuntimeException(
-                    'Jenis aset sedang nonaktif.'
-                );
-            }
+        DB::transaction(function () use ($jenis, $validated) {
 
             $stokLama = (int) $jenis->stok;
-
             $tambahStok = (int) $validated['tambah_stok'];
 
             $stokBaru = $stokLama + $tambahStok;
 
             /*
-             * Update stok Jenis Aset.
+             * Update stok Jenis Aset
              */
             $jenis->update([
-                'stok' => $stokBaru,
+                'stok' => $stokBaru
             ]);
 
             /*
-             * Membuat Unit/Data Aset baru.
+             * VR-AM-JNS-012
+             * Membuat unit baru sebanyak jumlah stok tambahan.
              */
-            for (
-                $i = $stokLama + 1;
-                $i <= $stokBaru;
-                $i++
-            ) {
+            for ($i = 0; $i < $tambahStok; $i++) {
+
                 Aset::create([
                     'kode_aset' => $this->generateKodeAset(
                         $jenis->nama_jenis,
-                        $i
+                        $jenis->id_jenis
                     ),
 
                     'id_jenis' =>
@@ -499,187 +399,135 @@ class JenisAsetController extends Controller
 
 
     /**
-     * Mengubah status Jenis Aset.
-     *
      * FR-AM-JNS-006
-     *
-     * VR:
-     * - VR-AM-JNS-013
-     * - VR-AM-JNS-014
+     * Mengubah status Jenis Aset
      */
     public function ubahStatus(string $id)
     {
         /*
-         * ID harus diverifikasi melalui database.
+         * VR-AM-JNS-014
          */
         $jenis = JenisAset::findOrFail($id);
 
         DB::transaction(function () use ($jenis) {
 
-            /*
-             * Ambil data terbaru dan kunci record.
-             */
-            $jenis = JenisAset::where(
-                'id_jenis',
-                $jenis->id_jenis
-            )
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            /*
-             * Status hanya boleh Aktif atau Nonaktif.
-             */
-            if (
-                !in_array(
-                    $jenis->status_jenis,
-                    ['Aktif', 'Nonaktif'],
-                    true
-                )
-            ) {
-                throw new \RuntimeException(
-                    'Status jenis aset tidak valid.'
-                );
-            }
-
-            /*
-             * Jika Aktif -> Nonaktif.
-             */
             if ($jenis->status_jenis === 'Aktif') {
 
+                /*
+                 * Menjadi Nonaktif
+                 */
                 $jenis->update([
-                    'status_jenis' => 'Nonaktif',
+                    'status_jenis' => 'Nonaktif'
                 ]);
 
                 /*
-                 * Semua unit yang terhubung
-                 * menjadi Nonaktif.
+                 * BR-AM-JNS-021
                  */
                 $jenis->aset()->update([
-                    'status_aset' => 'Nonaktif',
+                    'status_aset' => 'Nonaktif'
                 ]);
 
             } else {
 
                 /*
-                 * Jika Nonaktif -> Aktif.
+                 * Menjadi Aktif kembali
                  */
                 $jenis->update([
-                    'status_jenis' => 'Aktif',
+                    'status_jenis' => 'Aktif'
                 ]);
 
                 /*
-                 * Unit yang sebelumnya Nonaktif
-                 * karena jenis aset nonaktif
-                 * dikembalikan menjadi Tersedia.
+                 * Unit yang nonaktif karena Jenis Aset
+                 * kembali menjadi tersedia.
                  */
                 $jenis->aset()
                     ->where('status_aset', 'Nonaktif')
                     ->update([
-                        'status_aset' => 'Tersedia',
+                        'status_aset' => 'Tersedia'
                     ]);
             }
         });
 
-        $pesan = $jenis->status_jenis === 'Aktif'
-            ? 'Jenis aset berhasil diaktifkan.'
-            : 'Jenis aset dan unit aset berhasil dinonaktifkan.';
+        if ($jenis->status_jenis === 'Aktif') {
+
+            $pesan =
+                'Jenis aset dan unit aset berhasil diaktifkan.';
+
+        } else {
+
+            $pesan =
+                'Jenis aset dan unit aset berhasil dinonaktifkan.';
+        }
 
         return redirect()
             ->route('jenis-aset.index')
-            ->with(
-                'success',
-                $pesan
-            );
+            ->with('success', $pesan);
     }
 
 
     /**
-     * Generate kode Jenis Aset.
+     * Generate kode Jenis Aset otomatis.
      *
      * Format:
      * JA-001
      * JA-002
      * JA-003
-     * dst.
-     *
-     * Kode tidak berasal dari input Admin.
      */
     private function generateKodeJenis(): string
     {
-        $lastJenis = JenisAset::orderBy(
-            'id_jenis',
-            'desc'
-        )->first();
+        $jenisTerakhir = JenisAset::query()
+            ->orderByRaw(
+                "CAST(SUBSTRING(id_jenis, 4) AS UNSIGNED) DESC"
+            )
+            ->first();
 
-        if (!$lastJenis) {
+        if (!$jenisTerakhir) {
             $nomorBaru = 1;
         } else {
             $nomorTerakhir = (int) str_replace(
                 'JA-',
                 '',
-                $lastJenis->id_jenis
+                $jenisTerakhir->id_jenis
             );
 
             $nomorBaru = $nomorTerakhir + 1;
         }
 
-        /*
-         * Pastikan kode benar-benar unik.
-         */
         do {
-            $idJenisBaru = 'JA-' . str_pad(
+            $kode = 'JA-' . str_pad(
                 $nomorBaru,
                 3,
                 '0',
                 STR_PAD_LEFT
             );
 
-            $sudahAda = JenisAset::where(
-                'id_jenis',
-                $idJenisBaru
-            )->exists();
+            $nomorBaru++;
 
-            if ($sudahAda) {
-                $nomorBaru++;
-            }
+        } while (
+            JenisAset::where('id_jenis', $kode)->exists()
+        );
 
-        } while ($sudahAda);
-
-        return $idJenisBaru;
+        return $kode;
     }
 
 
     /**
-     * Membuat kode Unit/Data Aset.
+     * Generate kode Unit/Data Aset.
      *
-     * Prefix diambil dari nama Jenis Aset.
+     * Contoh:
+     * LAP01
+     * LAP02
+     * KUR01
      */
     private function generateKodeAset(
         string $namaJenis,
-        int $nomor
+        string $idJenis
     ): string {
         $prefix = $this->getPrefix($namaJenis);
 
-        /*
-         * Cek agar kode unit tidak bentrok.
-         */
-        $kode = $prefix . str_pad(
-            $nomor,
-            2,
-            '0',
-            STR_PAD_LEFT
-        );
+        $nomor = Aset::where('id_jenis', $idJenis)->count() + 1;
 
-        /*
-         * Jika kode sudah ada, gunakan nomor berikutnya.
-         */
-        while (
-            Aset::where(
-                'kode_aset',
-                $kode
-            )->exists()
-        ) {
-            $nomor++;
+        do {
 
             $kode = $prefix . str_pad(
                 $nomor,
@@ -687,15 +535,19 @@ class JenisAsetController extends Controller
                 '0',
                 STR_PAD_LEFT
             );
-        }
+
+            $nomor++;
+
+        } while (
+            Aset::where('kode_aset', $kode)->exists()
+        );
 
         return $kode;
     }
 
 
     /**
-     * Mengambil prefix kode Unit/Data Aset
-     * dari nama Jenis Aset.
+     * Mengambil 3 huruf pertama dari nama Jenis Aset.
      */
     private function getPrefix(string $namaJenis): string
     {
@@ -705,16 +557,14 @@ class JenisAsetController extends Controller
             trim($namaJenis)
         );
 
-        /*
-         * Jika nama tidak menghasilkan karakter
-         * alfabet, gunakan prefix AST.
-         */
-        if ($nama === '') {
-            return 'AST';
-        }
-
-        return strtoupper(
+        $prefix = strtoupper(
             substr($nama, 0, 3)
+        );
+
+        return str_pad(
+            $prefix,
+            3,
+            'X'
         );
     }
 }

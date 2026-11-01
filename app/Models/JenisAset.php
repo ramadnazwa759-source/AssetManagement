@@ -39,11 +39,11 @@ class JenisAset extends Model
 
     // Relasi ke sub kategori aset
     public function subKategori()
-    {
-        return $this->belongsTo(
-            SubKategoriAset::class,
-            'id_sub_kategori_aset',
-            'id_sub_kategori_aset'
-        );
-    }
+{
+    return $this->belongsTo(
+        SubKategoriAset::class,
+        'id_sub_kategori_aset',
+        'id_sub_kategori'
+    );
+}
 }

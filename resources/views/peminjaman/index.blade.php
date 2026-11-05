@@ -31,6 +31,12 @@
         </div>
     @endif
 
+    @if (session('error'))
+        <div class="alert alert-error">
+            {{ session('error') }}
+        </div>
+    @endif
+
     @if ($errors->any())
         <div class="alert alert-error">
             <strong>Terjadi kesalahan:</strong>
@@ -106,7 +112,13 @@
                     <label for="status_peminjaman">Status Peminjaman</label>
                     <select name="status_peminjaman" id="status_peminjaman">
                         <option value="">Semua Status</option>
-                        @foreach (['Dipinjam', 'Dikembalikan', 'Dibatalkan'] as $status)
+
+                        @foreach ([
+                            'Dipinjam',
+                            'Sebagian Dikembalikan',
+                            'Dikembalikan',
+                            'Dibatalkan'
+                        ] as $status)
                             <option
                                 value="{{ $status }}"
                                 @selected(request('status_peminjaman') === $status)
@@ -201,6 +213,7 @@
                                 @php
                                     $statusClass = match ($item->status_peminjaman) {
                                         'Dipinjam' => 'status-borrowed',
+                                        'Sebagian Dikembalikan' => 'status-partial',
                                         'Dikembalikan' => 'status-returned',
                                         'Dibatalkan' => 'status-cancelled',
                                         default => 'status-default',
@@ -213,13 +226,30 @@
                                 </span>
                             </td>
 
+                            {{-- AKSI --}}
                             <td class="text-center">
-                                <a
-                                    href="{{ route('peminjaman.show', $item->id_peminjaman) }}"
-                                    class="btn-detail"
-                                >
-                                    Detail
-                                </a>
+                                <div class="action-buttons">
+
+                                    <a
+                                        href="{{ route('peminjaman.show', $item->id_peminjaman) }}"
+                                        class="btn-detail"
+                                    >
+                                        Detail
+                                    </a>
+
+                                    @if (in_array($item->status_peminjaman, [
+                                        'Dipinjam',
+                                        'Sebagian Dikembalikan'
+                                    ]))
+                                        <a
+                                            href="{{ route('pengembalian.create', $item->id_peminjaman) }}"
+                                            class="btn-return"
+                                        >
+                                            Pengembalian
+                                        </a>
+                                    @endif
+
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -651,6 +681,11 @@ tbody tr:hover {
     color: #a16207;
 }
 
+.status-partial {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
 .status-returned {
     background: #ecfdf3;
     color: #15803d;
@@ -667,24 +702,45 @@ tbody tr:hover {
 }
 
 /* ACTION */
-.btn-detail {
+.action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-detail,
+.btn-return {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 33px;
-    padding: 0 13px;
-    border: 1px solid #bfdbfe;
+    padding: 0 11px;
     border-radius: 6px;
-    background: #eff6ff;
-    color: #1d4ed8;
     text-decoration: none;
     font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
 }
 
+.btn-detail {
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
 .btn-detail:hover {
     background: #dbeafe;
+}
+
+.btn-return {
+    border: 1px solid #a7f3d0;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.btn-return:hover {
+    background: #d1fae5;
 }
 
 /* EMPTY STATE */
@@ -821,6 +877,10 @@ tbody tr:hover {
 
     .result-info {
         padding: 12px 14px;
+    }
+
+    .action-buttons {
+        justify-content: flex-start;
     }
 
     .pagination-container {

@@ -16,9 +16,10 @@ class DetailPeminjaman extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id_peminjaman',
-        'id_jenis',
-        'jumlah_pinjam',
+    'id_peminjaman',
+    'id_jenis',
+    'jumlah_pinjam',
+    'jumlah_dikembalikan',
     ];
 
     public function peminjaman()

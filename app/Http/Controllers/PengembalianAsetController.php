@@ -60,7 +60,7 @@ class PengembalianAsetController extends Controller
         }
 
         return view(
-            'asset-management.pengembalian.create',
+            'pengembalian.create',
             compact('peminjaman', 'unit')
         );
     }
@@ -93,10 +93,7 @@ class PengembalianAsetController extends Controller
                 'min:1',
             ],
 
-            'unit.*' => [
-                'required',
-                'in:Baik,Rusak',
-            ],
+            'unit.*' => 'required|in:Baik,Rusak Ringan,Rusak Berat',
         ], [
             'tanggal_pengembalian.required' =>
                 'Tanggal pengembalian wajib diisi.',
@@ -242,14 +239,13 @@ class PengembalianAsetController extends Controller
 
                 // Menyimpan detail pengembalian setiap unit.
                 DetailPengembalian::create([
-                    'id_pengembalian' =>
-                        $pengembalian->id_pengembalian,
-
-                    'kode_aset' =>
-                        $unit->kode_aset,
-
-                    'kondisi_kembali' =>
-                        $kondisiKembali,
+                    'id_detail_pengembalian' => 'DPR-' . strtoupper(Str::random(21)),
+                    'id_pengembalian' => $pengembalian->id_pengembalian,
+                    'id_aset' => $unit->kode_aset,
+                    'kondisi' => $kondisiKembali === 'Rusak'
+                        ? 'Rusak Ringan'
+                        : 'Baik',
+                    'status' => 'Dikembalikan',
                 ]);
 
                 // Menentukan kondisi dan status aset.
@@ -264,15 +260,16 @@ class PengembalianAsetController extends Controller
                 // Memperbarui kondisi dan status aset.
                 Aset::where('kode_aset', $unit->kode_aset)
                     ->update([
-                        'kondisi_aset' => $kondisiAset,
-                        'status_aset' => $statusAset,
+                        'kondisi_aset' => $kondisiKembali,
+                        'status_aset' => $kondisiKembali === 'Baik'
+                            ? 'Tersedia'
+                            : 'Perlu Perbaikan',
                     ]);
 
                 // Menandai unit peminjaman sudah dikembalikan.
                 $unit->update([
                     'status_unit' => 'Dikembalikan',
-                    'tanggal_dikembalikan' =>
-                        $validated['tanggal_pengembalian'],
+                    'tanggal_dikembalikan' => $validated['tanggal_pengembalian'],
                 ]);
             }
 

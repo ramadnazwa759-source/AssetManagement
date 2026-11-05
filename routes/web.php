@@ -160,4 +160,7 @@ Route::middleware('asset.auth')->group(function () {
 
     Route::post('/{id}', [PengembalianAsetController::class, 'store'])
         ->name('pengembalian.store');
+
+    Route::get('/pengembalian/detail/{id}', [PengembalianAsetController::class, 'show'])
+    ->name('pengembalian.show');
 });

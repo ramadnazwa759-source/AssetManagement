@@ -326,7 +326,7 @@ class PengembalianAsetController extends Controller
         });
 
         return redirect()
-            ->route('peminjaman.show', $id)
+            ->route('pengembalian.show', $id)
             ->with(
                 'success',
                 'Pengembalian aset berhasil disimpan.'
@@ -353,4 +353,14 @@ class PengembalianAsetController extends Controller
 
         return $kode;
     }
+
+    public function show($id)
+{
+    $pengembalian = PengembalianAset::with([
+        'peminjaman',
+        'detailPengembalian.aset.jenis',
+    ])->findOrFail($id);
+
+    return view('asset-management.pengembalian.show', compact('pengembalian'));
+}
 }

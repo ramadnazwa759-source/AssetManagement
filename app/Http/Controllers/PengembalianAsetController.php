@@ -361,6 +361,6 @@ class PengembalianAsetController extends Controller
         'detailPengembalian.aset.jenis',
     ])->findOrFail($id);
 
-    return view('asset-management.pengembalian.show', compact('pengembalian'));
+    return view('pengembalian.show', compact('pengembalian'));
 }
 }

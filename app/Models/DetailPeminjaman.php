@@ -10,17 +10,17 @@ class DetailPeminjaman extends Model
 
     protected $primaryKey = 'id_detail_peminjaman';
 
-    public $incrementing = false;
+    // ID menggunakan AUTO_INCREMENT BIGINT
+    public $incrementing = true;
 
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
     protected $fillable = [
-        'id_detail_peminjaman',
         'id_peminjaman',
         'id_jenis',
         'jumlah_pinjam',
     ];
-    
+
     public function peminjaman()
     {
         return $this->belongsTo(
@@ -36,6 +36,15 @@ class DetailPeminjaman extends Model
             JenisAset::class,
             'id_jenis',
             'id_jenis'
+        );
+    }
+
+    public function detailUnit()
+    {
+        return $this->hasMany(
+            DetailUnitPeminjaman::class,
+            'id_detail_peminjaman',
+            'id_detail_peminjaman'
         );
     }
 }

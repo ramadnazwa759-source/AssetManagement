@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\KategoriAsetController;
 use App\Http\Controllers\SubKategoriAsetController;
 use App\Http\Controllers\LokasiAsetController;
+use App\Http\Controllers\PeminjamanAsetController;
 
 
 // ROUTE FIKS
@@ -145,4 +146,10 @@ Route::middleware('asset.auth')->group(function () {
     Route::patch('/aset/{kode_aset}/status', [AsetController::class, 'ubahStatus'])
         ->name('aset.status');
     
+    // Peminjaman Aset
+    Route::resource('peminjaman', PeminjamanAsetController::class)
+    ->only(['index', 'create', 'store', 'show']);
+
+    Route::post('/peminjaman/{id}/batal', [PeminjamanAsetController::class, 'batal'])
+        ->name('peminjaman.batal');
 });

@@ -8,6 +8,10 @@ return new class extends Migration
     // Menambahkan status perlu perbaikan pada aset
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         DB::statement("
             ALTER TABLE aset
             MODIFY status_aset
@@ -24,6 +28,10 @@ return new class extends Migration
     // Mengembalikan status aset
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         DB::statement("
             ALTER TABLE aset
             MODIFY status_aset

@@ -5,9 +5,13 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    // Mengubah status aset menjadi enum
+    // Mengubah status aset menjadi enum khusus MySQL
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         DB::statement("
             ALTER TABLE aset
             MODIFY status_aset
@@ -19,6 +23,10 @@ return new class extends Migration
     // Mengembalikan status aset menjadi varchar
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         DB::statement("
             ALTER TABLE aset
             MODIFY status_aset

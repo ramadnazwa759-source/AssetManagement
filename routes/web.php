@@ -9,6 +9,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\KategoriAsetController;
 use App\Http\Controllers\SubKategoriAsetController;
 use App\Http\Controllers\LokasiAsetController;
+use App\Http\Controllers\PeminjamanAsetController;
+
 
 
 // ROUTE FIKS
@@ -105,7 +107,7 @@ Route::middleware('asset.auth')->group(function () {
         ->name('lokasi.destroy');
 
     // Jenis Aset
-    
+
     Route::get('/jenis-aset', [JenisAsetController::class, 'index'])
         ->name('jenis-aset.index');
 
@@ -127,7 +129,7 @@ Route::middleware('asset.auth')->group(function () {
     Route::patch('/jenis-aset/{id}/status', [JenisAsetController::class, 'ubahStatus'])
         ->name('jenis-aset.status');
 
-    
+
     // Data Aset
 
     Route::get('/aset', [AsetController::class, 'index'])
@@ -144,5 +146,21 @@ Route::middleware('asset.auth')->group(function () {
 
     Route::patch('/aset/{kode_aset}/status', [AsetController::class, 'ubahStatus'])
         ->name('aset.status');
-    
+
+    // Peminjaman Aset
+    Route::get('/peminjaman', [PeminjamanAsetController::class, 'index'])
+        ->name('peminjaman.index');
+
+    Route::get('/peminjaman/tambah', [PeminjamanAsetController::class, 'create'])
+        ->name('peminjaman.create');
+
+    Route::post('/peminjaman', [PeminjamanAsetController::class, 'store'])
+        ->name('peminjaman.store');
+
+    Route::get('/peminjaman/{id}', [PeminjamanAsetController::class, 'show'])
+        ->name('peminjaman.show');
+
+    Route::post('/peminjaman/{id}/batal', [PeminjamanAsetController::class, 'batal'])
+        ->name('peminjaman.batal');
+
 });

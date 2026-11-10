@@ -61,6 +61,12 @@
             'icon'  => '<path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/>',
             'link'  => route('lokasi.index'),
         ],
+        [
+            'title' => 'Peminjaman',
+            'desc'  => 'Kelola transaksi peminjaman aset',
+            'icon'  => '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 10h6M9 14h6M9 18h3"/>',
+            'link'  => route('peminjaman.index'),
+        ],
     ];
 
     $subs = collect($subKategori)->take(8);
@@ -196,12 +202,10 @@
     margin: 0;
 }
 
-
 /* Footer tidak dipakai di halaman ini */
 footer {
     display: none !important;
 }
-
 
 /* ---------- Section ---------- */
 
@@ -237,7 +241,6 @@ footer {
     text-decoration: underline;
 }
 
-
 /* ---------- Gaya kartu bersama ---------- */
 
 .stat,
@@ -249,7 +252,6 @@ footer {
         0 1px 2px rgba(30, 58, 95, .05),
         0 4px 14px rgba(30, 58, 95, .06);
 }
-
 
 /* =========================================================
    KARTU STATISTIK
@@ -309,7 +311,6 @@ footer {
     font-size: 12px;
     color: var(--muted);
 }
-
 
 /* =========================================================
    MENU KELOLA DATA
@@ -385,7 +386,6 @@ footer {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 
 /* =========================================================
    SUBKATEGORI
@@ -465,7 +465,6 @@ footer {
     text-align: center;
 }
 
-
 /* =========================================================
    RESPONSIVE
 ========================================================= */
@@ -495,7 +494,6 @@ footer {
     .stat-value {
         font-size: 26px;
     }
-
 }
 
 @media (max-width: 480px) {

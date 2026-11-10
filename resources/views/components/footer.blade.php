@@ -1,11 +1,7 @@
 <footer class="site-footer">
-
     <div class="footer-inner">
-
         <div class="footer-brand">
-
             <div class="footer-brand-top">
-
                 <span class="brand-mark">
                     <svg viewBox="0 0 48 48" fill="none">
                         <path
@@ -26,57 +22,14 @@
                     <strong>KALISAWAH</strong>
                     <span>Asset Management</span>
                 </div>
-
             </div>
 
-            <p>
-                Sistem pengelolaan aset untuk mendukung operasional
-                Kalisawah Adventure.
-            </p>
-
+            <p>Sistem pengelolaan aset Kalisawah Adventure.</p>
         </div>
-
-
-        <div class="footer-column">
-
-            <span class="footer-label">
-                NAVIGASI
-            </span>
-
-            <a href="#">Overview</a>
-            <a href="#">Aset</a>
-            <a href="#">Peminjaman</a>
-            <a href="#">Riwayat</a>
-
-        </div>
-
-
-        <div class="footer-column">
-
-            <span class="footer-label">
-                MASTER DATA
-            </span>
-
-            <a href="#">Kategori & Subkategori</a>
-            <a href="#">Jenis Aset</a>
-            <a href="#">Lokasi Aset</a>
-            <a href="#">Data Aset</a>
-
-        </div>
-
     </div>
-
 
     <div class="footer-bottom">
-
-        <span>
-            © {{ date('Y') }} Kalisawah Asset Management
-        </span>
-
-        <span>
-            Admin Portal
-        </span>
-
+        <span>© {{ date('Y') }} Kalisawah Asset Management</span>
+        <span>Admin Portal</span>
     </div>
-
 </footer>

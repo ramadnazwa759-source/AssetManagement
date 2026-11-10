@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JenisAset;
 use App\Models\Aset;
 use App\Models\SubKategoriAset;
+use App\Services\StockRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -267,81 +268,90 @@ class JenisAsetController extends Controller
      * FR-AM-JNS-005
      * Menambahkan stok Jenis Aset.
      */
-    public function addStock(Request $request, string $id)
-    {
-        // VR-AM-JNS-009
-        $validated = $request->validate([
-            'tambah_stok' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
-        ]);
+    
+public function addStock(Request $request, string $id)
+{
+    // VR-AM-JNS-009
+    $validated = $request->validate([
+        'tambah_stok' => [
+            'required',
+            'integer',
+            'min:1',
+        ],
+    ]);
 
-        // Proses penambahan stok dilakukan dalam transaksi.
-        $berhasil = DB::transaction(function () use ($id, $validated) {
+    // Proses penambahan stok dilakukan dalam transaksi.
+    $berhasil = DB::transaction(function () use ($id, $validated) {
 
-            // Mengunci data Jenis Aset selama proses penambahan stok.
-            $jenis = JenisAset::where('id_jenis', $id)
-                ->lockForUpdate()
-                ->firstOrFail();
+        // Mengunci data Jenis Aset selama proses penambahan stok.
+        $jenis = JenisAset::where('id_jenis', $id)
+            ->lockForUpdate()
+            ->firstOrFail();
 
-            // VR-AM-JNS-010
-            // Jenis Aset Nonaktif tidak boleh ditambahkan stok.
-            if ($jenis->status_jenis === 'Nonaktif') {
-                return false;
-            }
+        // Menggunakan aturan penambahan stok dari StockRules.
+        $rules = new StockRules();
 
-            $stokLama = (int) $jenis->stok;
-            $tambahStok = (int) $validated['tambah_stok'];
-
-            $stokBaru = $stokLama + $tambahStok;
-
-            // Memperbarui jumlah stok pada Jenis Aset.
-            $jenis->update([
-                'stok' => $stokBaru,
-            ]);
-
-            // VR-AM-JNS-012
-            // Membuat unit baru sebanyak jumlah stok tambahan.
-            // Setiap unit mendapatkan created_at otomatis.
-            for ($i = 0; $i < $tambahStok; $i++) {
-
-                Aset::create([
-                    'kode_aset' => $this->generateKodeAset(
-                        $jenis->nama_jenis,
-                        $jenis->id_jenis
-                    ),
-
-                    'id_jenis' => $jenis->id_jenis,
-                    'id_lokasi' => null,
-                    'nama_aset' => $jenis->nama_jenis,
-                    'tanggal_beli' => null,
-                    'kondisi_aset' => 'Baik',
-                    'status_aset' => 'Tersedia',
-                    'gambar' => null,
-                    'keterangan' => null,
-                ]);
-            }
-
-            return true;
-        });
-
-        if (!$berhasil) {
-            return back()
-                ->withErrors([
-                    'tambah_stok' =>
-                        'Jenis Aset Nonaktif tidak dapat digunakan untuk menambah stok.',
-                ]);
+        // VR-AM-JNS-010
+        // Jenis Aset Nonaktif tidak boleh ditambahkan stok.
+        if (!$rules->canAddStock($jenis->status_jenis)) {
+            return false;
         }
 
-        return redirect()
-            ->route('jenis-aset.index')
-            ->with(
-                'success',
-                'Stok aset berhasil ditambahkan.'
-            );
+        $stokLama = (int) $jenis->stok;
+        $tambahStok = (int) $validated['tambah_stok'];
+
+        // Menghitung jumlah stok baru menggunakan StockRules.
+        $stokBaru = $rules->calculateNewStock(
+            $stokLama,
+            $tambahStok
+        );
+
+        // Memperbarui jumlah stok pada Jenis Aset.
+        $jenis->update([
+            'stok' => $stokBaru,
+        ]);
+
+        // VR-AM-JNS-012
+        // Membuat unit baru sebanyak jumlah stok tambahan.
+        for ($i = 0; $i < $tambahStok; $i++) {
+
+            Aset::create([
+                'kode_aset' => $this->generateKodeAset(
+                    $jenis->nama_jenis,
+                    $jenis->id_jenis
+                ),
+
+                'id_jenis' => $jenis->id_jenis,
+                'id_lokasi' => null,
+                'nama_aset' => $jenis->nama_jenis,
+                'tanggal_beli' => null,
+                'kondisi_aset' => 'Baik',
+                'status_aset' => 'Tersedia',
+                'gambar' => null,
+                'keterangan' => null,
+            ]);
+        }
+
+        return true;
+    });
+
+    // Jika Jenis Aset Nonaktif, penambahan stok ditolak.
+    if (!$berhasil) {
+        return back()
+            ->withErrors([
+                'tambah_stok' =>
+                    'Jenis Aset Nonaktif tidak dapat digunakan untuk menambah stok.',
+            ]);
     }
+
+    // Jika berhasil, kembali ke halaman Jenis Aset.
+    return redirect()
+        ->route('jenis-aset.index')
+        ->with(
+            'success',
+            'Stok aset berhasil ditambahkan.'
+        );
+}
 
 
     /**

@@ -12,125 +12,209 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class PengembalianAsetController extends Controller
 {
-    // Menampilkan form pengembalian
+    /**
+     * Menampilkan form pengembalian aset.
+     */
     public function create(string $id)
     {
+        // Memastikan transaksi peminjaman terdaftar.
         $peminjaman = PeminjamanAset::with([
             'detailPeminjaman.jenis',
             'detailPeminjaman.detailUnit.aset'
         ])->findOrFail($id);
 
-        // Transaksi yang sudah selesai tidak dapat dikembalikan lagi
-        if (
-            $peminjaman->status_peminjaman === 'Dikembalikan' ||
-            $peminjaman->status_peminjaman === 'Dibatalkan'
-        ) {
+        // Pengembalian hanya dapat dilakukan pada transaksi
+        // yang masih memiliki unit berstatus Dipinjam.
+        if (!in_array($peminjaman->status_peminjaman, [
+            'Dipinjam',
+            'Sebagian Dikembalikan'
+        ])) {
             return redirect()
                 ->route('peminjaman.index')
                 ->with(
                     'error',
-                    'Transaksi ini sudah tidak dapat diproses.'
+                    'Transaksi ini sudah tidak dapat diproses untuk pengembalian.'
                 );
         }
 
-        // Mengambil unit yang belum dikembalikan
-        $unit = $peminjaman
-            ->detailPeminjaman
+        // Mengambil unit yang belum dikembalikan.
+        $unit = $peminjaman->detailPeminjaman
             ->flatMap(function ($detail) {
                 return $detail->detailUnit
                     ->where('status_unit', 'Dipinjam');
-            });
+            })
+            ->values();
+
+        // Memastikan masih ada unit yang dapat dikembalikan.
+        if ($unit->isEmpty()) {
+            return redirect()
+                ->route('peminjaman.show', $id)
+                ->with(
+                    'error',
+                    'Tidak ada unit aset yang belum dikembalikan.'
+                );
+        }
 
         return view(
-            'asset-management.pengembalian.create',
+            'pengembalian.create',
             compact('peminjaman', 'unit')
         );
     }
 
-      // Menyimpan pengembalian aset
+    /**
+     * Menyimpan pengembalian aset.
+     */
     public function store(Request $request, string $id)
     {
+        // Memastikan transaksi peminjaman terdaftar.
+        $peminjamanAwal = PeminjamanAset::findOrFail($id);
+
+        // Validasi tanggal pengembalian.
         $validated = $request->validate([
-            'tanggal_pengembalian' =>
-                'required|date',
+            'tanggal_pengembalian' => [
+                'required',
+                'date',
+                'after_or_equal:' . $peminjamanAwal->tanggal_pinjam,
+            ],
 
-            'catatan' =>
-                'nullable|string',
+            'catatan' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
 
-            'unit' =>
-                'required|array|min:1',
+            'unit' => [
+                'required',
+                'array',
+                'min:1',
+            ],
 
-            'unit.*' =>
-                'required|in:Baik,Rusak',
+            'unit.*' => 'required|in:Baik,Rusak Ringan,Rusak Berat',
         ], [
+            'tanggal_pengembalian.required' =>
+                'Tanggal pengembalian wajib diisi.',
+
+            'tanggal_pengembalian.date' =>
+                'Tanggal pengembalian harus berupa tanggal yang valid.',
+
+            'tanggal_pengembalian.after_or_equal' =>
+                'Tanggal pengembalian tidak boleh lebih awal dari tanggal peminjaman.',
+
             'unit.required' =>
-                'Minimal satu unit harus dipilih.',
+                'Minimal satu unit aset harus dipilih.',
+
+            'unit.array' =>
+                'Data unit aset tidak valid.',
 
             'unit.min' =>
-                'Minimal satu unit harus dipilih.',
+                'Minimal satu unit aset harus dipilih.',
+
+            'unit.*.required' =>
+                'Kondisi setiap unit aset wajib ditentukan.',
 
             'unit.*.in' =>
-                'Kondisi unit harus Baik atau Rusak.',
+                'Kondisi unit aset hanya dapat dipilih Baik atau Rusak.',
+
+            'catatan.max' =>
+                'Catatan maksimal 1000 karakter.',
         ]);
 
-        DB::transaction(function () use (
-            $validated,
-            $id
-        ) {
-            $peminjaman = PeminjamanAset::findOrFail($id);
+        DB::transaction(function () use ($validated, $id) {
 
-            // Memastikan transaksi masih dapat diproses
-            if (
-                $peminjaman->status_peminjaman === 'Dikembalikan' ||
-                $peminjaman->status_peminjaman === 'Dibatalkan'
-            ) {
+            // Mengunci transaksi agar tidak diproses bersamaan.
+            $peminjaman = PeminjamanAset::where(
+                'id_peminjaman',
+                $id
+            )
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            // Memastikan transaksi masih dapat dikembalikan.
+            if (!in_array($peminjaman->status_peminjaman, [
+                'Dipinjam',
+                'Sebagian Dikembalikan'
+            ])) {
                 throw ValidationException::withMessages([
                     'unit' =>
-                        'Transaksi ini sudah tidak dapat diproses.'
+                        'Transaksi ini sudah tidak dapat diproses untuk pengembalian.',
                 ]);
             }
 
-            $detailIds = DetailPeminjaman::where(
-                'id_peminjaman',
-                $peminjaman->id_peminjaman
-            )->pluck('id_detail_peminjaman');
+            // Memastikan tanggal tidak lebih awal dari tanggal peminjaman.
+            if (
+                $validated['tanggal_pengembalian'] <
+                $peminjaman->tanggal_pinjam
+            ) {
+                throw ValidationException::withMessages([
+                    'tanggal_pengembalian' =>
+                        'Tanggal pengembalian tidak boleh lebih awal dari tanggal peminjaman.',
+                ]);
+            }
 
             $kodeAset = array_keys($validated['unit']);
 
-            // Mengunci unit yang akan dikembalikan
+            // Mengambil detail peminjaman milik transaksi yang dipilih.
+            $detailPeminjaman = DetailPeminjaman::where(
+                'id_peminjaman',
+                $peminjaman->id_peminjaman
+            )
+                ->lockForUpdate()
+                ->get();
+
+            $detailIds = $detailPeminjaman->pluck(
+                'id_detail_peminjaman'
+            );
+
+            // Mengunci unit yang akan dikembalikan.
             $detailUnit = DetailUnitPeminjaman::whereIn(
                 'id_detail_peminjaman',
                 $detailIds
             )
-                ->whereIn(
-                    'kode_aset',
-                    $kodeAset
-                )
+                ->whereIn('kode_aset', $kodeAset)
                 ->lockForUpdate()
                 ->get();
 
-            // Memastikan semua unit berasal dari transaksi ini
+            // Memastikan seluruh unit berasal dari transaksi ini.
             if ($detailUnit->count() !== count($kodeAset)) {
                 throw ValidationException::withMessages([
                     'unit' =>
-                        'Terdapat unit aset yang tidak terdaftar pada transaksi ini.'
+                        'Terdapat unit aset yang tidak terdaftar pada transaksi peminjaman ini.',
                 ]);
             }
 
-            // Memastikan unit belum pernah dikembalikan
+            // Memastikan tidak ada unit yang diproses lebih dari sekali.
             foreach ($detailUnit as $unit) {
                 if ($unit->status_unit !== 'Dipinjam') {
                     throw ValidationException::withMessages([
                         'unit' =>
-                            "Unit {$unit->kode_aset} sudah pernah dikembalikan."
+                            "Unit {$unit->kode_aset} sudah dikembalikan atau tidak dapat diproses kembali.",
                     ]);
                 }
             }
 
-            // Membuat catatan pengembalian
+            // Mengunci data aset yang akan dikembalikan.
+            $aset = Aset::whereIn('kode_aset', $kodeAset)
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('kode_aset');
+
+            // Memastikan seluruh aset masih terdaftar dan berstatus Dipinjam.
+            foreach ($detailUnit as $unit) {
+                $dataAset = $aset->get($unit->kode_aset);
+
+                if (!$dataAset || $dataAset->status_aset !== 'Dipinjam') {
+                    throw ValidationException::withMessages([
+                        'unit' =>
+                            "Data aset {$unit->kode_aset} tidak valid atau statusnya bukan Dipinjam.",
+                    ]);
+                }
+            }
+
+            // Membuat data transaksi pengembalian.
             $pengembalian = PengembalianAset::create([
                 'kode_pengembalian' =>
                     $this->generateKodePengembalian(),
@@ -148,127 +232,135 @@ class PengembalianAsetController extends Controller
                     $validated['catatan'] ?? null,
             ]);
 
-            // Memproses setiap unit yang dikembalikan
+            // Memproses setiap unit yang dikembalikan.
             foreach ($detailUnit as $unit) {
 
-                $kondisiKembali =
-                    $validated['unit'][$unit->kode_aset];
+                $kondisiKembali = $validated['unit'][$unit->kode_aset];
 
-                // Menyimpan riwayat detail pengembalian
+                // Menyimpan detail pengembalian setiap unit.
                 DetailPengembalian::create([
-                    'id_pengembalian' =>
-                        $pengembalian->id_pengembalian,
-
-                    'kode_aset' =>
-                        $unit->kode_aset,
-
-                    'kondisi_kembali' =>
-                        $kondisiKembali,
+                    'id_detail_pengembalian' => 'DPR-' . strtoupper(Str::random(21)),
+                    'id_pengembalian' => $pengembalian->id_pengembalian,
+                    'id_aset' => $unit->kode_aset,
+                    'kondisi' => $kondisiKembali === 'Rusak'
+                        ? 'Rusak Ringan'
+                        : 'Baik',
+                    'status' => 'Dikembalikan',
                 ]);
 
-                // Menentukan kondisi dan status terkini aset
+                // Menentukan kondisi dan status aset.
                 if ($kondisiKembali === 'Baik') {
-
                     $kondisiAset = 'Baik';
                     $statusAset = 'Tersedia';
-
                 } else {
-
                     $kondisiAset = 'Rusak Ringan';
                     $statusAset = 'Perlu Perbaikan';
                 }
 
-                // Mengubah kondisi dan status aset
-                Aset::where(
-                    'kode_aset',
-                    $unit->kode_aset
-                )->update([
-                    'kondisi_aset' => $kondisiAset,
-                    'status_aset' => $statusAset,
-                ]);
+                // Memperbarui kondisi dan status aset.
+                Aset::where('kode_aset', $unit->kode_aset)
+                    ->update([
+                        'kondisi_aset' => $kondisiKembali,
+                        'status_aset' => $kondisiKembali === 'Baik'
+                            ? 'Tersedia'
+                            : 'Perlu Perbaikan',
+                    ]);
 
-                // Menandai unit sudah dikembalikan
+                // Menandai unit peminjaman sudah dikembalikan.
                 $unit->update([
-                    'status_unit' =>
-                        'Dikembalikan',
-
-                    'tanggal_dikembalikan' =>
-                        $validated['tanggal_pengembalian'],
+                    'status_unit' => 'Dikembalikan',
+                    'tanggal_dikembalikan' => $validated['tanggal_pengembalian'],
                 ]);
             }
 
-            // Menghitung total unit dalam transaksi
+            // Menghitung jumlah unit yang sudah dikembalikan
+            // pada masing-masing detail peminjaman.
+            foreach ($detailPeminjaman as $detail) {
+                $jumlahDikembalikan = DetailUnitPeminjaman::where(
+                    'id_detail_peminjaman',
+                    $detail->id_detail_peminjaman
+                )
+                    ->where('status_unit', 'Dikembalikan')
+                    ->count();
+
+                $detail->update([
+                    'jumlah_dikembalikan' => $jumlahDikembalikan,
+                ]);
+            }
+
+            // Menghitung seluruh unit dalam transaksi.
             $totalUnit = DetailUnitPeminjaman::whereIn(
                 'id_detail_peminjaman',
                 $detailIds
             )->count();
 
-            // Menghitung total unit yang sudah dikembalikan
+            // Menghitung seluruh unit yang sudah dikembalikan.
             $totalDikembalikan = DetailUnitPeminjaman::whereIn(
                 'id_detail_peminjaman',
                 $detailIds
             )
-                ->where(
-                    'status_unit',
-                    'Dikembalikan'
-                )
+                ->where('status_unit', 'Dikembalikan')
                 ->count();
 
-            // Menentukan status transaksi
-            if ($totalDikembalikan === 0) {
-
-                $statusPeminjaman = 'Dipinjam';
-
-            } elseif (
-                $totalDikembalikan < $totalUnit
-            ) {
-
-                $statusPeminjaman =
-                    'Sebagian Dikembalikan';
-
+            // Menentukan status transaksi berdasarkan kondisi seluruh unit.
+            if ($totalDikembalikan === $totalUnit) {
+                $statusPeminjaman = 'Dikembalikan';
+            } elseif ($totalDikembalikan > 0) {
+                $statusPeminjaman = 'Sebagian Dikembalikan';
             } else {
-
-                $statusPeminjaman =
-                    'Dikembalikan';
+                $statusPeminjaman = 'Dipinjam';
             }
 
-            // Memperbarui transaksi peminjaman
+            // Memperbarui jumlah dan status transaksi peminjaman.
             $peminjaman->update([
-                'jumlah_dikembalikan' =>
-                    $totalDikembalikan,
-
-                'status_peminjaman' =>
-                    $statusPeminjaman,
+                'jumlah_dikembalikan' => $totalDikembalikan,
+                'status_peminjaman' => $statusPeminjaman,
             ]);
+
+            /*
+             * PENCATATAN RIWAYAT ASET
+             *
+             * Bagian ini perlu ditambahkan setelah struktur tabel
+             * dan model RiwayatAset diketahui.
+             */
         });
 
         return redirect()
-            ->route('peminjaman.show', $id)
+            ->route('pengembalian.show', $id)
             ->with(
                 'success',
                 'Pengembalian aset berhasil disimpan.'
             );
     }
 
-    // Membuat kode pengembalian otomatis
-        private function generateKodePengembalian()
-        {
-            do {
-                $kode = 'PGM-' .
-                    now()->format('Ymd') .
-                    '-' .
-                    strtoupper(
-                        \Illuminate\Support\Str::random(4)
-                    );
-            } while (
-                PengembalianAset::where(
-                    'kode_pengembalian',
-                    $kode
-                )->exists()
-            );
+    /**
+     * Membuat kode pengembalian otomatis.
+     */
+    private function generateKodePengembalian()
+    {
+        do {
+            $kode = 'PGM-' .
+                now()->format('Ymd') .
+                '-' .
+                strtoupper(Str::random(4));
 
-            return $kode;
-        }
+        } while (
+            PengembalianAset::where(
+                'kode_pengembalian',
+                $kode
+            )->exists()
+        );
 
+        return $kode;
+    }
 
+    public function show($id)
+{
+    $pengembalian = PengembalianAset::with([
+        'peminjaman',
+        'detailPengembalian.aset.jenis',
+    ])->findOrFail($id);
+
+    return view('pengembalian.show', compact('pengembalian'));
+}
 }

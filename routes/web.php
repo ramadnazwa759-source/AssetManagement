@@ -10,7 +10,7 @@ use App\Http\Controllers\KategoriAsetController;
 use App\Http\Controllers\SubKategoriAsetController;
 use App\Http\Controllers\LokasiAsetController;
 use App\Http\Controllers\PeminjamanAsetController;
-
+use App\Http\Controllers\PengembalianAsetController;
 
 
 // ROUTE FIKS
@@ -148,19 +148,20 @@ Route::middleware('asset.auth')->group(function () {
         ->name('aset.status');
 
     // Peminjaman Aset
-    Route::get('/peminjaman', [PeminjamanAsetController::class, 'index'])
-        ->name('peminjaman.index');
-
-    Route::get('/peminjaman/tambah', [PeminjamanAsetController::class, 'create'])
-        ->name('peminjaman.create');
-
-    Route::post('/peminjaman', [PeminjamanAsetController::class, 'store'])
-        ->name('peminjaman.store');
-
-    Route::get('/peminjaman/{id}', [PeminjamanAsetController::class, 'show'])
-        ->name('peminjaman.show');
+    Route::resource('peminjaman', PeminjamanAsetController::class)
+    ->only(['index', 'create', 'store', 'show']);
 
     Route::post('/peminjaman/{id}/batal', [PeminjamanAsetController::class, 'batal'])
         ->name('peminjaman.batal');
 
+    // Pengembalian Aset
+    Route::get('/{id}/create', [PengembalianAsetController::class, 'create'])
+        ->name('pengembalian.create');
+
+    Route::post('/{id}', [PengembalianAsetController::class, 'store'])
+        ->name('pengembalian.store');
+
+    Route::get('/pengembalian/detail/{id}', [PengembalianAsetController::class, 'show'])
+    ->name('pengembalian.show');
 });
+
